@@ -20,10 +20,11 @@ export default class LineClamp {
    * maxLines.
    */
   constructor (elm, maxLines = 1, useSoftClamp = true, strict = false) {
+    this._element = elm;
+
     const style      = this._getStyle(),
           lineHeight = parseInt(style.lineHeight, 10);
 
-    this._element = elm;
     this._originalWords = elm.textContent.split(/\s+/);
     this._maxHeight = lineHeight * this.maxLines;
     this._originalFontSize = parseInt(style.fontSize, 10);
@@ -108,6 +109,7 @@ export default class LineClamp {
   hardClamp () {
     // const style = this.getStyle();
     // const padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+    this._element.style.minHeight = 0;
     [this._element.textContent] = this._originalWords;
 
     for (let i = 1, len = this._originalWords.length; i < len; ++i) {
@@ -118,6 +120,8 @@ export default class LineClamp {
         break;
       }
     }
+
+    this._element.style.removeProperty('min-height');
   }
 
   /**
@@ -128,12 +132,14 @@ export default class LineClamp {
    */
   softClamp () {
     this._element.style.fontSize = '';
+    this._element.style.minHeight = '0';
 
     for (let i = this._originalFontSize; i >= this.minFontSize; --i) {
       if (this._shouldClamp()) {
         this._element.style.fontSize = `${i}px`;
       }
       else {
+        this._element.style.removeProperty('min-height');
         return;
       }
     }
