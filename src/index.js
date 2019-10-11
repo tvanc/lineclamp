@@ -1,31 +1,27 @@
-/**
- * Created by travis on 11/29/2016.
- */
-
-/**
- * @param elm
- * @param maxLines
- * @constructor
- */
 export default class LineClamp {
   /**
-   * @param {HTMLElement} elm The element to clamp.
-   * @param {Number} [maxLines] The maximum number of lines to allow.
-   * @param {Boolean} [useSoftClamp] If true, try reducing font size before trimming text.
-   * @param {Boolean} [strict]
+   * @param {HTMLElement} element The element to clamp.
+   * @param {Object} [options] Options.
+   * @param {Number}  [options.maxLines] The maximum number of lines to allow.
+   * @param {Boolean} [options.useSoftClamp] If true, try reducing font size before trimming text.
+   * @param {Boolean} [options.strict]
    * Whether to strictly interpret the maximum number of lines.
    * If false, will reduce font-size until the element is shorter than the line-height it had
    * when it was first watched, times maxLines.
    * If true, will reduce font-size until the number of lines occupied by the text is fewer than
    * maxLines.
    */
-  constructor (elm, maxLines = 1, useSoftClamp = true, strict = false) {
-    this._element = elm;
+  constructor (element, {
+      maxLines = 1,
+      useSoftClamp = true,
+      strict = false,
+  }) {
+    this._element = element;
 
-    const style      = this._getStyle(),
-          lineHeight = parseInt(style.lineHeight, 10);
+    const style = this._getStyle(),
+      lineHeight = parseInt(style.lineHeight, 10);
 
-    this._originalWords = elm.textContent.split(/\s+/);
+    this._originalWords = element.textContent.split(/\s+/);
     this._maxHeight = lineHeight * this.maxLines;
     this._originalFontSize = parseInt(style.fontSize, 10);
 
@@ -116,7 +112,8 @@ export default class LineClamp {
       this._element.textContent += ` ${this._originalWords[i]}`;
 
       if (this._shouldClamp()) {
-        this._element.innerHTML = `${this._originalWords.slice(0, i).join(' ')} &hellip;`;
+        this._element.innerHTML = `${this._originalWords.slice(0, i)
+          .join(' ')} &hellip;`;
         break;
       }
     }
@@ -181,9 +178,9 @@ export default class LineClamp {
   }
 
   _shouldClamp () {
-    const style       = this._getStyle(),
-          padding     = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom),
-          innerHeight = parseInt(style.height, 10) - padding;
+    const style = this._getStyle(),
+      padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom),
+      innerHeight = parseInt(style.height, 10) - padding;
 
     if (this.strict) {
       return Math.floor(innerHeight / parseInt(style.lineHeight, 10)) > this.maxLines;
