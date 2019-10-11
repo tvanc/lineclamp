@@ -1,9 +1,9 @@
 {
   "name": "@tvanc/lineclamp",
-  "description": "Limit the number of lines of text in an element, or the amount of space the text takes up.",
-  "main": "dist/index.js",
+  "description": "Limit the number of lines of text in an element, or the amount of vertical space the text takes up.",
+  "main": "src/index.js",
   "scripts": {
-    "test": "gulp watch",
+    "test": "browser-sync start -s './' -f './test/*' './src/index.js' --startPath 'test/index.html'",
     "prepublish": "npm run clean && npm run lint && npm run test && npm run build"
   },
   "repository": {
@@ -15,17 +15,16 @@
     "lineclamp",
     "line clamp",
     "max lines",
-    "text height",
+    "text height"
   ],
   "author": "Travis Van Couvering <travis@tvanc.com> (https://tvanc.com)",
   "license": "ISC",
   "homepage": "https://github.com/tvanc/lineclamp",
   "dependencies": {},
   "devDependencies": {
-    "gulp": "^4.0.2",
-    "mocha": "^5.2.0",
+    "browser-sync": "^2.26.7",
     "chai": "^4.2.0",
-    "browser-sync": "^2.26.7"
+    "mocha": "^5.2.0"
   },
   "bugs": {
     "url": "https://github.com/tvanc/lineclamp/issues"

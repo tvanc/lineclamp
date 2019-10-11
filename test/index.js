@@ -11,6 +11,7 @@ describe('LineClamp', () => {
         strict: true
       }
     );
+
     clamp.clamp();
     assert.isAtLeast(10, 50, 'Must be at least 50');
   });

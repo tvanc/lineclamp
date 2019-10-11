@@ -1,7 +1,7 @@
 export default class LineClamp {
   /**
    * @param {HTMLElement} element The element to clamp.
-   * @param {Object} [options] Options.
+   * @param {Object}  [options] Options.
    * @param {Number}  [options.maxLines] The maximum number of lines to allow.
    * @param {Boolean} [options.useSoftClamp] If true, try reducing font size before trimming text.
    * @param {Boolean} [options.strict]
@@ -79,23 +79,25 @@ export default class LineClamp {
    * `useSoftClamp`.
    */
   clamp () {
-    if (this._element.offsetHeight) {
-      const previouslyWatching = this._watching;
+    if (!this._element.offsetHeight) {
+      return;
+    }
 
-      // Ignore internally started mutations, lest we recurse into oblivion
-      this.unwatch();
+    const previouslyWatching = this._watching;
 
-      if (this.useSoftClamp) {
-        this.softClamp();
-      }
-      else {
-        this.hardClamp();
-      }
+    // Ignore internally started mutations, lest we recurse into oblivion
+    this.unwatch();
 
-      // Resume observation if previously watching
-      if (previouslyWatching) {
-        this.watch(false);
-      }
+    if (this.useSoftClamp) {
+      this.softClamp();
+    }
+    else {
+      this.hardClamp();
+    }
+
+    // Resume observation if previously watching
+    if (previouslyWatching) {
+      this.watch(false);
     }
   }
 
@@ -105,7 +107,7 @@ export default class LineClamp {
   hardClamp () {
     // const style = this.getStyle();
     // const padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
-    this._element.style.minHeight = 0;
+    this._element.style.minHeight = '0';
     [this._element.textContent] = this._originalWords;
 
     for (let i = 1, len = this._originalWords.length; i < len; ++i) {
