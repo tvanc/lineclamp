@@ -1,0 +1,9 @@
+.tester {
+    width: 400px;
+    background: powderblue;
+    font-size: 42px;
+}
+
+.tester:last-child {
+    background: lightcoral;
+}

@@ -3,6 +3,7 @@
 <head>
     <title>LineClamp Tests</title>
     <link rel="stylesheet" href="/node_modules/mocha/mocha.css">
+    <link rel="stylesheet" href="/test/test.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 <body>
@@ -10,16 +11,16 @@
 <div id="mocha"></div>
 
 <div id="examples" style="font-family: Arial, sans-serif">
-    <h1 id="strict-tester"
-        style="width:200px;background:powderblue;font-size:42px">
-        This text was on four lines, now it's on one!
+    <h1 id="strictTester" class="tester">
+        STRICTLY one line long.
     </h1>
 </div>
+
 
 <script src="/node_modules/chai/chai.js"></script>
 <script src="/node_modules/mocha/mocha.js"></script>
 <script>mocha.setup('bdd')</script>
-<script src="/test/index.js" type="module"></script>
+<script src="/test/test.js" type="module"></script>
 <script type="module">
     mocha
         .checkLeaks()
