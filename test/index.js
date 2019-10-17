@@ -1,4 +1,4 @@
-import LineClamp from '/src/index.js';
+import LineClamp from '/src/LineClamp.js';
 
 describe('LineClamp', () => {
   const assert = chai.assert;

@@ -1,7 +1,7 @@
 {
   "name": "@tvanc/lineclamp",
   "description": "Limit the number of lines of text in an element, or the amount of vertical space the text takes up.",
-  "main": "src/index.js",
+  "main": "src/LineClamp.js",
   "scripts": {
     "test": "browser-sync start -s './' -f './test/*' './src/index.js' --startPath 'test/index.html'",
     "prepublish": "npm run clean && npm run lint && npm run test && npm run build"
