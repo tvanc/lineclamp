@@ -1,5 +1,32 @@
 export default class LineClamp {
   /**
+   * @param {Boolean} [doInitialClamp]
+   * If true, watch and clamp. If false, just watch.
+   */
+  watch(doInitialClamp = false) {
+    if (this._watching) {
+      return;
+    }
+
+    if (doInitialClamp) {
+      this.clamp();
+    }
+
+    window.addEventListener('resize', this.updateHandler);
+
+    // Minimum required to detect changes to text nodes,
+    // and wholesale replacement via innerHTML
+    this.observer.observe(this._element, {
+      characterData: true,
+      subtree:       true,
+      childList:     true,
+      attributes:    true,
+    });
+
+    this._watching = true;
+  }
+
+  /**
    * @param {HTMLElement} element
    * The element to clamp.
    *
@@ -15,53 +42,66 @@ export default class LineClamp {
    * @param {Boolean} [options.strict]
    * Whether to strictly interpret the maximum number of lines.
    * If false, will reduce font-size until the element is shorter than the line-height it had
-   * when it was first watched, times maxLines.
-   * If true, will reduce font-size until the number of lines occupied by the text is fewer than
+   * when it was first watched, times {@see maxLines}.
+   * If true, will reduce font-size until the number of lines occupied by the
+   * text is fewer than {@see maxLines}.
    *
    * @param {string} [options.basisLineHeight]
    * Line-height to use as the basis of calculations. Can be any valid CSS
    * value for line-height. Defaults to the height of one line of text in the
    * element at time of first clamp.
+
+   * @param {string} [options.minFontSize]
+   * The lowest font size to try before resorting to removing trailing text.
+   *
+   * @param {number} [options.maxFontSize]
+   * The max font size. We'll start with this font size then reduce until
+   * text fits constraints, or we reach {@see minFontSize}.
    */
   constructor(element, {
     maxLines = 1,
     useSoftClamp = true,
     strict = false,
     basisLineHeight = undefined,
-    minFontSize = 1
-  }) {
+    minFontSize = 1,
+    maxFontSize = undefined,
+  } = {}) {
     this._element = element;
 
     const style = this._getStyle();
 
-    if (basisLineHeight === undefined) {
+    if (undefined === basisLineHeight) {
       basisLineHeight = this.currentLineHeight;
     }
 
-    this._originalWords = element.textContent.split(/\s+/);
-    this._originalFontSize = parseInt(style.fontSize, 10);
+    if (undefined === maxFontSize) {
+      maxFontSize = parseInt(style.fontSize, 10);
+    }
 
     this.maxLines = maxLines;
     this.useSoftClamp = useSoftClamp;
     this.strict = strict;
     this.basisLineHeight = basisLineHeight;
     this.minFontSize = minFontSize;
+    this.maxFontSize = maxFontSize;
 
-    this._resizeHandler = () => this._resetClampTimer();
+    Object.defineProperty(this, 'originalWords', {
+      writable: false,
+      value:    element.textContent.split(/\s+/),
+    });
+
+    Object.defineProperty(this, 'updateHandler', {
+      writable: false,
+      value:    () => this.clampSoon(),
+    });
+
+    Object.defineProperty(this, 'observer', {
+      writable: false,
+      value:    new MutationObserver(this.updateHandler),
+    });
   }
 
-  /**
-   * @return MutationObserver
-   */
-  get observer() {
-    if (!this._observer) {
-      this._observer = new MutationObserver(() => this.clamp());
-    }
-
-    return this._observer;
-  }
-
-  get currentLineHeight () {
+  get currentLineHeight() {
     return this._whileMeasuring(element => {
       const originalHtml = element.innerHTML;
 
@@ -73,30 +113,15 @@ export default class LineClamp {
     });
   }
 
-  /**
-   * @param {Boolean} [doInitialClamp]
-   * If true, watch and clamp. If false, just watch.
-   */
-  watch(doInitialClamp = false) {
-    if (doInitialClamp) {
-      this.clamp();
-    }
-
-    if (this._watching) {
-      return;
-    }
-
-    window.addEventListener('resize', this._resizeHandler);
-    this._observeMutations();
-
-    this._watching = true;
-  }
-
   unwatch() {
-    this._disconnectMutationObserver();
-    window.removeEventListener('resize', this._resizeHandler);
+    this.observer.disconnect();
+    window.removeEventListener('resize', this.updateHandler);
 
     this._watching = false;
+  }
+
+  clampSoon() {
+    requestAnimationFrame(() => this.clamp());
   }
 
   /**
@@ -133,13 +158,13 @@ export default class LineClamp {
     // const style = this.getStyle();
     // const padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
     this._element.style.minHeight = '0';
-    [this._element.textContent] = this._originalWords;
+    [this._element.textContent] = this.originalWords;
 
-    for (let i = 1, len = this._originalWords.length; i < len; ++i) {
-      this._element.textContent += ` ${this._originalWords[i]}`;
+    for (let i = 1, len = this.originalWords.length; i < len; ++i) {
+      this._element.textContent += ` ${this.originalWords[i]}`;
 
-      if (this._shouldClamp()) {
-        this._element.innerHTML = `${this._originalWords.slice(0, i)
+      if (this.shouldClamp()) {
+        this._element.innerHTML = `${this.originalWords.slice(0, i)
           .join(' ')} &hellip;`;
         break;
       }
@@ -156,8 +181,8 @@ export default class LineClamp {
     this._element.style.fontSize = '';
     this._element.style.minHeight = '0';
 
-    for (let i = this._originalFontSize; i >= this.minFontSize; --i) {
-      if (this._shouldClamp()) {
+    for (let i = this.maxFontSize; i >= this.minFontSize; --i) {
+      if (this.shouldClamp()) {
         this._element.style.fontSize = `${i}px`;
       }
       else {
@@ -169,20 +194,20 @@ export default class LineClamp {
     this.hardClamp();
   }
 
-  _whileMeasuring(callback) {
-    this._enterMeasuringState();
-    const returnValue = callback(this._element);
-    this._exitMeasuringState();
+  shouldClamp() {
+    const style = this._getStyle(),
+      padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom),
+      innerHeight = parseInt(style.height, 10) - padding;
 
-    return returnValue;
-  }
-
-  _enterMeasuringState() {
-    if (this._measuring) {
-      return;
+    if (this.strict) {
+      return innerHeight / this.currentLineHeight > this.maxLines;
     }
 
-    this._oldStyles = this._element.style.cssText;
+    return innerHeight / this.basisLineHeight > this.maxLines;
+  }
+
+  _whileMeasuring(callback) {
+    const { cssText } = this._element.style;
     const stylesToUpdate = [
       'padding',
       'paddingTop',
@@ -199,56 +224,12 @@ export default class LineClamp {
       this._element.style[property] = '0';
     }
 
-    this._measuring = true;
+    const returnValue = callback(this._element);
+    this._element.style.cssText = cssText;
+
+    return returnValue;
   }
 
-  _exitMeasuringState() {
-    this._measuring = false;
-    this._element.style.cssText = this._oldStyles;
-  }
-
-  /**
-   * Watch for changes to _element.
-   * @private
-   */
-  _observeMutations() {
-    // Minimum required to detect changes to text nodes,
-    // and wholesale replacement via innerHTML
-    this.observer.observe(this._element, {
-      characterData: true,
-      subtree:       true,
-      childList:     true,
-      attributes:    true,
-    });
-  }
-
-  /**
-   * Stop watching for changes to _element.
-   * @private
-   */
-  _disconnectMutationObserver() {
-    this.observer.disconnect();
-  }
-
-  /**
-   * Clamp at the next available opportunity.
-   * @private
-   */
-  _resetClampTimer() {
-    requestAnimationFrame(() => this.clamp());
-  }
-
-  _shouldClamp() {
-    const style = this._getStyle(),
-      padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom),
-      innerHeight = parseInt(style.height, 10) - padding;
-
-    if (this.strict) {
-      return innerHeight / this.currentLineHeight > this.maxLines;
-    }
-
-    return innerHeight / this.basisLineHeight > this.maxLines;
-  }
 
   _getStyle() {
     return window.getComputedStyle(this._element);
