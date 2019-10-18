@@ -1,9 +1,11 @@
 .tester {
-    width: 400px;
-    background: powderblue;
-    font-size: 42px;
+    width: 300px;
+    background: lightgreen;
+    font-size: 72px;
+    line-height: 1;
+    margin: 15px 0;
 }
 
 .tester:last-child {
-    background: lightcoral;
+    background: powderblue;
 }
