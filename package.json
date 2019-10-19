@@ -3,7 +3,7 @@
   "description": "Limit the number of lines of text in an element, or the amount of vertical space the text takes up.",
   "main": "src/LineClamp.js",
   "scripts": {
-    "test": "browser-sync start -s './' -f './test/*' './src/test.js' --startPath 'test/test.html'",
+    "test": "jest",
     "prepublish": "npm run clean && npm run lint && npm run test && npm run build"
   },
   "repository": {
@@ -20,7 +20,9 @@
   "author": "Travis Van Couvering <travis@tvanc.com> (https://tvanc.com)",
   "license": "ISC",
   "homepage": "https://github.com/tvanc/lineclamp",
-  "dependencies": {},
+  "dependencies": {
+    "jest": "^24.9.0"
+  },
   "devDependencies": {
     "browser-sync": "^2.26.7",
     "chai": "^4.2.0",
