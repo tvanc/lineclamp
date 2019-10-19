@@ -1,62 +1,43 @@
+/**
+ * @typedef {Object} LineClampInit
+ *
+ * @property {Number} maxLines
+ * The maximum number of lines to allow.
+ *
+ * @property {Boolean} useSoftClamp
+ * If true, try reducing font size before trimming text.
+ *
+ * @property {Boolean} strict
+ * Whether to strictly interpret the maximum number of lines.
+ * If true, reduce font-size until the number of lines occupied by the text
+ * is fewer than {@see maxLines}.
+ * If false, reduce font-size until the element is shorter than the height of
+ * one line at the time of initialization, times {@see maxLines}.
+ *
+ * @property {string} basisLineHeight
+ * Line-height to use as the basis of calculations. Can be any valid CSS
+ * value for line-height. Defaults to the height of one line of text in the
+ * element at time of first clamp.
+
+ * @property {number} minFontSize
+ * The lowest font size to try before resorting to removing trailing text
+ * (hard clamping).
+ *
+ * @property {number} maxFontSize
+ * The max font size. We'll start with this font size then reduce until
+ * text fits constraints, or font size is equal to {@see minFontSize}.
+ */
+
+/**
+ * Reduces font size or trims text to make it fit within specified bounds.
+ */
 export default class LineClamp {
-  /**
-   * @param {Boolean} [doInitialClamp]
-   * If true, watch and clamp. If false, just watch.
-   */
-  watch(doInitialClamp = false) {
-    if (this._watching) {
-      return;
-    }
-
-    if (doInitialClamp) {
-      this.clamp();
-    }
-
-    window.addEventListener('resize', this.updateHandler);
-
-    // Minimum required to detect changes to text nodes,
-    // and wholesale replacement via innerHTML
-    this.observer.observe(this._element, {
-      characterData: true,
-      subtree:       true,
-      childList:     true,
-      attributes:    true,
-    });
-
-    this._watching = true;
-  }
-
   /**
    * @param {HTMLElement} element
    * The element to clamp.
    *
-   * @param {Object} [options]
-   * Options.
-   *
-   * @param {Number} [options.maxLines]
-   * The maximum number of lines to allow.
-   *
-   * @param {Boolean} [options.useSoftClamp]
-   * If true, try reducing font size before trimming text.
-   *
-   * @param {Boolean} [options.strict]
-   * Whether to strictly interpret the maximum number of lines.
-   * If false, will reduce font-size until the element is shorter than the line-height it had
-   * when it was first watched, times {@see maxLines}.
-   * If true, will reduce font-size until the number of lines occupied by the
-   * text is fewer than {@see maxLines}.
-   *
-   * @param {string} [options.basisLineHeight]
-   * Line-height to use as the basis of calculations. Can be any valid CSS
-   * value for line-height. Defaults to the height of one line of text in the
-   * element at time of first clamp.
-
-   * @param {string} [options.minFontSize]
-   * The lowest font size to try before resorting to removing trailing text.
-   *
-   * @param {number} [options.maxFontSize]
-   * The max font size. We'll start with this font size then reduce until
-   * text fits constraints, or we reach {@see minFontSize}.
+   * @param {LineClampInit} [options]
+   * Options for the behavior of the line clamp.
    */
   constructor(element, {
     maxLines = 1,
@@ -68,7 +49,7 @@ export default class LineClamp {
   } = {}) {
     this._element = element;
 
-    const style = this._getStyle();
+    const style = this.computedStyle;
 
     if (undefined === basisLineHeight) {
       basisLineHeight = this.currentLineHeight;
@@ -111,6 +92,40 @@ export default class LineClamp {
 
       return height;
     });
+  }
+
+  /**
+   * @returns {CSSStyleDeclaration}
+   */
+  get computedStyle() {
+    return window.getComputedStyle(this._element);
+  }
+
+  /**
+   * @param {Boolean} [doInitialClamp]
+   * If true, watch and clamp. If false, just watch.
+   */
+  watch(doInitialClamp = false) {
+    if (this._watching) {
+      return;
+    }
+
+    if (doInitialClamp) {
+      this.clamp();
+    }
+
+    window.addEventListener('resize', this.updateHandler);
+
+    // Minimum required to detect changes to text nodes,
+    // and wholesale replacement via innerHTML
+    this.observer.observe(this._element, {
+      characterData: true,
+      subtree:       true,
+      childList:     true,
+      attributes:    true,
+    });
+
+    this._watching = true;
   }
 
   unwatch() {
@@ -195,7 +210,7 @@ export default class LineClamp {
   }
 
   shouldClamp() {
-    const style = this._getStyle(),
+    const style = this.computedStyle,
       padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom),
       innerHeight = parseInt(style.height, 10) - padding;
 
@@ -228,10 +243,5 @@ export default class LineClamp {
     this._element.style.cssText = cssText;
 
     return returnValue;
-  }
-
-
-  _getStyle() {
-    return window.getComputedStyle(this._element);
   }
 }
