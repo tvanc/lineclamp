@@ -20,7 +20,9 @@
   "author": "Travis Van Couvering <travis@tvanc.com> (https://tvanc.com)",
   "license": "ISC",
   "homepage": "https://github.com/tvanc/lineclamp",
-  "dependencies": {},
+  "dependencies": {
+    "chai-spies": "^1.0.0"
+  },
   "devDependencies": {
     "browser-sync": "^2.26.7",
     "chai": "^4.2.0",
