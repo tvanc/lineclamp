@@ -85,7 +85,7 @@ export default class LineClamp {
     this.maxFontSize = maxFontSize;
   }
 
-  get currentLineHeight() {
+  get currentLineHeight () {
     return this._whileMeasuring(element => {
       const originalHtml = element.innerHTML;
 
@@ -100,7 +100,7 @@ export default class LineClamp {
   /**
    * @returns {CSSStyleDeclaration}
    */
-  get computedStyle() {
+  get computedStyle () {
     return window.getComputedStyle(this._element);
   }
 
@@ -108,111 +108,124 @@ export default class LineClamp {
    * @param {Boolean} [doInitialClamp]
    * If true, watch and clamp. If false, just watch.
    */
-  watch(doInitialClamp = false) {
-    if (this._watching) {
-      return;
-    }
-
+  watch (doInitialClamp = false) {
     if (doInitialClamp) {
       this.clamp();
     }
 
-    window.addEventListener('resize', this.updateHandler);
+    if (!this._watching) {
+      window.addEventListener('resize', this.updateHandler);
 
-    // Minimum required to detect changes to text nodes,
-    // and wholesale replacement via innerHTML
-    this.observer.observe(this._element, {
-      characterData: true,
-      subtree:       true,
-      childList:     true,
-      attributes:    true,
-    });
+      // Minimum required to detect changes to text nodes,
+      // and wholesale replacement via innerHTML
+      this.observer.observe(this._element, {
+        characterData: true,
+        subtree:       true,
+        childList:     true,
+        attributes:    true,
+      });
 
-    this._watching = true;
+      this._watching = true;
+    }
+
+    return this;
   }
 
-  unwatch() {
+  unwatch () {
     this.observer.disconnect();
     window.removeEventListener('resize', this.updateHandler);
 
     this._watching = false;
-  }
-
-  clampSoon() {
-    requestAnimationFrame(() => this.clamp());
+    return this;
   }
 
   /**
    * Conduct either soft clamping or hard clamping, according to the value of
    * property {@see useSoftClamp}.
    */
-  clamp() {
-    if (!this._element.offsetHeight) {
-      return;
+  clamp () {
+    if (this._element.offsetHeight) {
+      const previouslyWatching = this._watching;
+
+      // Ignore internally started mutations, lest we recurse into oblivion
+      this.unwatch();
+
+      if (this.useSoftClamp) {
+        this.softClamp();
+      }
+      else {
+        this.hardClamp();
+      }
+
+      // Resume observation if previously watching
+      if (previouslyWatching) {
+        this.watch(false);
+      }
     }
 
-    const previouslyWatching = this._watching;
-
-    // Ignore internally started mutations, lest we recurse into oblivion
-    this.unwatch();
-
-    if (this.useSoftClamp) {
-      this.softClamp();
-    }
-    else {
-      this.hardClamp();
-    }
-
-    // Resume observation if previously watching
-    if (previouslyWatching) {
-      this.watch(false);
-    }
+    return this;
   }
 
   /**
    * Trims text content to force it to fit within the demanded number of lines.
    */
-  hardClamp() {
-    // const style = this.getStyle();
-    // const padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+  hardClamp () {
     this._element.style.minHeight = '0';
-    [this._element.textContent] = this.originalWords;
 
-    for (let i = 1, len = this.originalWords.length; i < len; ++i) {
-      this._element.textContent += ` ${this.originalWords[i]}`;
+    if (this.shouldClamp()) {
+      for (let i = 0, len = this.originalWords.length; i < len; ++i) {
+        let currentText = this.originalWords.slice(0, i).join(' ');
+        this._element.textContent = currentText;
 
-      if (this.shouldClamp()) {
-        this._element.innerHTML = `${this.originalWords.slice(0, i)
-          .join(' ')} &hellip;`;
-        break;
+        if (this.shouldClamp()) {
+          do {
+            currentText = currentText.slice(0, -1);
+            this._element.innerHTML = currentText + '&hellip;';
+          }
+          while (this.shouldClamp());
+
+          break;
+        }
       }
+
+      const event = new CustomEvent('clamp.hardClamp');
+      this._element.dispatchEvent(event);
     }
 
     this._element.style.removeProperty('min-height');
+
+    return this;
   }
 
   /**
    * Reduce font size until the text fits within the specified number of lines.
    * If it still doesn't fit, resort to using {@see hardClamp()}.
    */
-  softClamp() {
+  softClamp () {
     this._element.style.fontSize = '';
     this._element.style.minHeight = '0';
 
-    for (let i = this.maxFontSize; i >= this.minFontSize; --i) {
-      if (this.shouldClamp()) {
-        this._element.style.fontSize = `${i}px`;
+    if (this.shouldClamp()) {
+      for (let i = this.maxFontSize; i >= this.minFontSize; --i) {
+        if (this.shouldClamp()) {
+          this._element.style.fontSize = `${i}px`;
+        }
+        else {
+          break;
+        }
       }
-      else {
-        this._element.style.removeProperty('min-height');
-        return;
-      }
+
+      const event = new CustomEvent('clamp.softClamp');
+      this._element.dispatchEvent(event);
+
+      this._element.style.removeProperty('min-height');
+      this.hardClamp();
     }
 
-    this.hardClamp();
+    return this;
   }
 
-  shouldClamp() {
+  shouldClamp () {
     const style = this.computedStyle,
       padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom),
       innerHeight = parseInt(style.height, 10) - padding;
@@ -224,8 +237,9 @@ export default class LineClamp {
     return innerHeight / this.basisLineHeight > this.maxLines;
   }
 
-  _whileMeasuring(callback) {
-    const { cssText } = this._element.style;
+  _whileMeasuring (callback) {
+    const previouslyWatching = this._watching;
+    const {cssText} = this._element.style;
     const stylesToUpdate = [
       'padding',
       'paddingTop',
@@ -238,12 +252,18 @@ export default class LineClamp {
       'paddingInlineStart',
     ];
 
+    this.unwatch();
+
     for (const property of stylesToUpdate) {
       this._element.style[property] = '0';
     }
 
     const returnValue = callback(this._element);
     this._element.style.cssText = cssText;
+
+    if (previouslyWatching) {
+      this.watch(false);
+    }
 
     return returnValue;
   }
