@@ -39,14 +39,32 @@ export default class LineClamp {
    * @param {LineClampInit} [options]
    * Options for the behavior of the line clamp.
    */
-  constructor(element, {
+  constructor (element, {
     maxLines = 1,
     useSoftClamp = true,
-    strict = false,
+    strict = true,
     basisLineHeight = undefined,
     minFontSize = 1,
     maxFontSize = undefined,
   } = {}) {
+    Object.defineProperty(this, 'originalWords', {
+      writable: false,
+      value:    element.textContent.split(/\s+/),
+    });
+
+    Object.defineProperty(this, 'updateHandler', {
+      writable: false,
+      value:    () => {
+        this.clamp();
+        console.log('I ran and should not have')
+      },
+    });
+
+    Object.defineProperty(this, 'observer', {
+      writable: false,
+      value:    new MutationObserver(this.updateHandler),
+    });
+
     this._element = element;
 
     const style = this.computedStyle;
@@ -65,21 +83,6 @@ export default class LineClamp {
     this.basisLineHeight = basisLineHeight;
     this.minFontSize = minFontSize;
     this.maxFontSize = maxFontSize;
-
-    Object.defineProperty(this, 'originalWords', {
-      writable: false,
-      value:    element.textContent.split(/\s+/),
-    });
-
-    Object.defineProperty(this, 'updateHandler', {
-      writable: false,
-      value:    () => this.clampSoon(),
-    });
-
-    Object.defineProperty(this, 'observer', {
-      writable: false,
-      value:    new MutationObserver(this.updateHandler),
-    });
   }
 
   get currentLineHeight() {
