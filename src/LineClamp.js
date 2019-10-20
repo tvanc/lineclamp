@@ -28,6 +28,11 @@
  * text fits constraints, or font size is equal to {@see minFontSize}.
  */
 
+const events = new WeakMap();
+const triggerEvent = (instance, type) => {
+  instance._element.dispatchEvent(new CustomEvent(type));
+};
+
 /**
  * Reduces font size or trims text to make it fit within specified bounds.
  */
@@ -54,10 +59,7 @@ export default class LineClamp {
 
     Object.defineProperty(this, 'updateHandler', {
       writable: false,
-      value:    () => {
-        this.clamp();
-        console.log('I ran and should not have')
-      },
+      value:    () => this.clamp(),
     });
 
     Object.defineProperty(this, 'observer', {
@@ -188,8 +190,8 @@ export default class LineClamp {
         }
       }
 
-      const event = new CustomEvent('clamp.hardClamp');
-      this._element.dispatchEvent(event);
+      triggerEvent(this, 'lineclamp.hardClamp');
+      triggerEvent(this, 'lineclamp.clamp');
     }
 
     this._element.style.removeProperty('min-height');
@@ -206,20 +208,26 @@ export default class LineClamp {
     this._element.style.minHeight = '0';
 
     if (this.shouldClamp()) {
+      let done = false;
+
       for (let i = this.maxFontSize; i >= this.minFontSize; --i) {
-        if (this.shouldClamp()) {
-          this._element.style.fontSize = `${i}px`;
-        }
-        else {
+        this._element.style.fontSize = `${i}px`;
+        if (!this.shouldClamp()) {
+          done = true;
+
           break;
         }
       }
 
-      const event = new CustomEvent('clamp.softClamp');
-      this._element.dispatchEvent(event);
-
+      triggerEvent(this, 'lineclamp.softClamp');
       this._element.style.removeProperty('min-height');
-      this.hardClamp();
+
+      if (!done) {
+        this.hardClamp();
+      }
+      else {
+        triggerEvent(this, 'lineclamp.clamp');
+      }
     }
 
     return this;

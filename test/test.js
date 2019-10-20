@@ -55,7 +55,7 @@ describe('LineClamp', () => {
   it('Hard clamps to one line.', () => {
     const element = document.getElementById('hardClampTester');
     const clamp = new LineClamp(element, {
-      maxLines: 1,
+      maxLines:     1,
       useSoftClamp: false,
     });
 
@@ -84,6 +84,41 @@ describe('LineClamp', () => {
     expect(hardClampSpy).to.have.been.called();
   });
 
+  it('Events trigger properly', () => {
+    const element = document.getElementById('eventsTester');
+    const clamp = new LineClamp(element);
+
+    // Guarantee softClamp() will escalate to hardClamp()
+    clamp.minFontSize = clamp.maxFontSize;
+
+    let softClampTriggeredFirst = false;
+    let hardClampTriggeredNext = false;
+    let plainClampTriggeredLast = false;
+
+    element.addEventListener(
+      'lineclamp.softClamp',
+      // Ensure correct order
+      () => softClampTriggeredFirst = !hardClampTriggeredNext
+    );
+
+    element.addEventListener(
+      'lineclamp.hardClamp',
+      // Ensure correct order
+      () => hardClampTriggeredNext = softClampTriggeredFirst
+    );
+
+    element.addEventListener(
+      'lineclamp.clamp',
+      () => plainClampTriggeredLast = hardClampTriggeredNext
+    );
+
+    clamp.clamp();
+
+    assert(softClampTriggeredFirst, 'Soft clamp triggered first');
+    assert(hardClampTriggeredNext, 'Hard clamp triggered next');
+    assert(plainClampTriggeredLast, 'Plain clamp triggered last');
+  });
+
   it('Reclamps on DOM mutation', done => {
     const element = document.getElementById('mutationTester');
     const clamp = new LineClamp(element, {minFontSize: 48});
@@ -94,7 +129,7 @@ describe('LineClamp', () => {
     expect(clampSpy).not.to.have.been.called();
 
     element.addEventListener(
-      'clamp.hardClamp',
+      'lineclamp.hardClamp',
       () => {
         expect(clampSpy).to.have.been.called();
         done();
