@@ -172,8 +172,6 @@ export default class LineClamp {
    * Trims text content to force it to fit within the demanded number of lines.
    */
   hardClamp () {
-    this._element.style.minHeight = '0';
-
     if (this.shouldClamp()) {
       for (let i = 0, len = this.originalWords.length; i < len; ++i) {
         let currentText = this.originalWords.slice(0, i).join(' ');
@@ -205,7 +203,6 @@ export default class LineClamp {
    */
   softClamp () {
     this._element.style.fontSize = '';
-    this._element.style.minHeight = '0';
 
     if (this.shouldClamp()) {
       let done = false;
@@ -220,7 +217,6 @@ export default class LineClamp {
       }
 
       triggerEvent(this, 'lineclamp.softClamp');
-      this._element.style.removeProperty('min-height');
 
       if (!done) {
         this.hardClamp();

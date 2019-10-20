@@ -138,4 +138,20 @@ describe('LineClamp', () => {
 
     element.innerHTML = element.innerHTML + ' ';
   });
+
+  it('Padding, border, min-height, and font-size are taken into account', () => {
+    const element = document.getElementById('dimensionsTester');
+    const clamp = new LineClamp(element, {maxLines: 1});
+
+    clamp.clamp();
+
+    const currentLineHeight = clamp.currentLineHeight;
+    const currentHeight = element.offsetHeight;
+
+    assert.isAbove(
+      currentHeight,
+      currentLineHeight,
+      'Element is taller than the line height.'
+    );
+  });
 });
