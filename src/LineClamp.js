@@ -247,27 +247,15 @@ export default class LineClamp {
 
   _whileMeasuring (callback) {
     const previouslyWatching = this._watching;
-    const {cssText} = this._element.style;
-    const stylesToUpdate = [
-      'padding',
-      'paddingTop',
-      'paddingRight',
-      'paddingBottom',
-      'paddingLeft',
-      'paddingBlockStart',
-      'paddingInlineEnd',
-      'paddingBlockEnd',
-      'paddingInlineStart',
-    ];
-
+    const startingCssText = this._element.style.cssText;
     this.unwatch();
 
-    for (const property of stylesToUpdate) {
-      this._element.style[property] = '0';
+    for (const property of ['minHeight', 'borderWidth', 'padding']) {
+      this._element.style[property] = '0!important';
     }
 
     const returnValue = callback(this._element);
-    this._element.style.cssText = cssText;
+    this._element.style.cssText = startingCssText;
 
     if (previouslyWatching) {
       this.watch(false);
