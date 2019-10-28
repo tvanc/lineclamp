@@ -40,9 +40,9 @@ describe('LineClamp', () => {
     );
 
     assert.strictEqual(
-      currentHeight % currentLineHeight,
-      0,
-      'Current height is a clean multiple of the current line height'
+      currentHeight / currentLineHeight,
+      2,
+      'Element height is twice current line height (two lines)'
     );
 
     assert.isAtMost(

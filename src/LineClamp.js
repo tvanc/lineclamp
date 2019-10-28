@@ -1,4 +1,10 @@
 /**
+ * @todo test non left-to-right text
+ * @todo Account for characters that cause tall lines (emojis, Zalgot text)
+ * @todo Function with HTML nodes? Hard. Only maybe doable.
+ * @todo Enable fitting and *filling* specified dimensions
+ */
+/**
  * @typedef {Object} LineClampInit
  *
  * @property {Number} maxLines
@@ -26,6 +32,31 @@
  * @property {number} maxFontSize
  * The max font size. We'll start with this font size then reduce until
  * text fits constraints, or font size is equal to {@see minFontSize}.
+ */
+
+/**
+ * @typedef {Object} TextDimensions
+ *
+ * @property {lineHeight}
+ * The current height of one line of text.
+ *
+ * <strong>Note</strong>: For inline elements, CSS inheritance of the
+ * line-height property may cause this value to be smaller when
+ * there is only one line of text than when there are multiple.
+ *
+ * This value reflects the practical height of one line of text when measured.
+ * If there is only one line of text, this value will reflect the height of
+ * that line.
+ *
+ * If there are multiple lines, this value will reflect the height of the
+ * element with two lines of text in it - which may be more than double the
+ * height of the element when it only had one line of text - divided by two.
+ *
+ * Also, if your text has characters that "distort" line heights, this value may not
+ * match the line height you observe.
+ *
+ * @property {innerHeight} The height of the element with its current
+ * text, minus border and padding.
  */
 
 const events = new WeakMap();
@@ -100,14 +131,31 @@ export default class LineClamp {
     return window.getComputedStyle(this._element);
   }
 
+  /**
+   *
+   * @returns {TextDimensions}
+   */
   get textDimensions() {
     return this._whileMeasuring(element => {
       const originalHtml = element.innerHTML;
       const innerHeight = element.offsetHeight;
 
-      // Accounts for situations where parent has a different lineheight
-      element.innerHTML = '&nbsp;' + '<br>'.repeat(this.maxLines);
-      const lineHeight = element.offsetHeight / this.maxLines;
+      // Fill element with single non-breaking space to find height of one line
+      element.innerHTML = '&nbsp;';
+
+      // Get height of element with only one line of text
+      let lineHeight = element.offsetHeight;
+
+      // Element has more than one line of text
+      if (lineHeight < innerHeight) {
+        // Add another line
+        element.innerHTML += '<br>&nbsp;';
+
+        // CSS inheritance may increase practical line height when # of lines > 1
+        lineHeight = element.offsetHeight / 2;
+      }
+
+      // Restore original content
       element.innerHTML = originalHtml;
 
       return {
@@ -248,24 +296,30 @@ export default class LineClamp {
     return innerHeight / comparisonLineHeight > this.maxLines;
   }
 
+  /**
+   * TODO Try: clear HTML & minheight; get height, add line, get height; lineHeight=diff
+   * @param callback
+   * @returns {*}
+   * @private
+   */
   _whileMeasuring(callback) {
     const previouslyWatching = this._watching;
     const oldStyles = this._element.style.cssText;
-    const stylesToZeroOut = [
+    const propertiesToZeroOut = [
       'min-height',
       'border-top-width',
       'border-bottom-width',
       'padding-top-width',
       'padding-bottom-width',
     ];
-    const newStyles = stylesToZeroOut
-      .map(rule => `${rule}:0!important`)
-      .join(';');
 
+    // Unwatch before beginning our own mutations, lest we recurse
     this.unwatch();
 
     // Append, don't replace
-    this._element.style.cssText += ';' + stylesToZeroOut;
+    this._element.style.cssText += ';' + propertiesToZeroOut
+      .map(property => `${property}:0!important`)
+      .join(';');
 
     // Execute callback while reliable measurements can be made
     const returnValue = callback(this._element);
