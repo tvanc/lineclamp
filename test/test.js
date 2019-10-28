@@ -26,7 +26,7 @@ describe('LineClamp', () => {
       strict:   false,
     });
 
-    const startingHeight = clamp.currentLineHeight;
+    const startingLineHeight = clamp.currentLineHeight;
 
     clamp.clamp();
 
@@ -47,7 +47,7 @@ describe('LineClamp', () => {
 
     assert.isAtMost(
       currentHeight,
-      startingHeight,
+      startingLineHeight,
       'Current height equal to or less than starting height'
     );
   });
@@ -141,7 +141,7 @@ describe('LineClamp', () => {
 
   it('Padding, border, min-height, and font-size are taken into account', () => {
     const element = document.getElementById('dimensionsTester');
-    const clamp = new LineClamp(element, {maxLines: 1});
+    const clamp = new LineClamp(element, {maxLines: 2});
 
     clamp.clamp();
 
@@ -153,5 +153,16 @@ describe('LineClamp', () => {
       currentLineHeight,
       'Element is taller than the line height.'
     );
+  });
+
+  it('Works for inline text', () => {
+    const element = document.getElementById('displayInlineTester');
+    const clamp = new LineClamp(element, {maxLines: 2});
+
+    clamp.clamp();
+
+    const {innerHeight, lineHeight} = clamp.textDimensions;
+
+    assert.equal(innerHeight, lineHeight * 2, 'Inline text is correct height.');
   });
 });

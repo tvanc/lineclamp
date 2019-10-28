@@ -44,7 +44,7 @@ export default class LineClamp {
    * @param {LineClampInit} [options]
    * Options for the behavior of the line clamp.
    */
-  constructor (element, {
+  constructor(element, {
     maxLines = 1,
     useSoftClamp = true,
     strict = true,
@@ -71,6 +71,9 @@ export default class LineClamp {
 
     const style = this.computedStyle;
 
+    // Max lines needs to be set before getting currentLineHeight
+    this.maxLines = maxLines;
+
     if (undefined === basisLineHeight) {
       basisLineHeight = this.currentLineHeight;
     }
@@ -79,7 +82,6 @@ export default class LineClamp {
       maxFontSize = parseInt(style.fontSize, 10);
     }
 
-    this.maxLines = maxLines;
     this.useSoftClamp = useSoftClamp;
     this.strict = strict;
     this.basisLineHeight = basisLineHeight;
@@ -87,30 +89,39 @@ export default class LineClamp {
     this.maxFontSize = maxFontSize;
   }
 
-  get currentLineHeight () {
-    return this._whileMeasuring(element => {
-      const originalHtml = element.innerHTML;
-
-      element.innerHTML = '&nbsp;';
-      const height = element.clientHeight;
-      element.innerHTML = originalHtml;
-
-      return height;
-    });
+  get currentLineHeight() {
+    return this.textDimensions.lineHeight;
   }
 
   /**
    * @returns {CSSStyleDeclaration}
    */
-  get computedStyle () {
+  get computedStyle() {
     return window.getComputedStyle(this._element);
+  }
+
+  get textDimensions() {
+    return this._whileMeasuring(element => {
+      const originalHtml = element.innerHTML;
+      const innerHeight = element.offsetHeight;
+
+      // Accounts for situations where parent has a different lineheight
+      element.innerHTML = '&nbsp;' + '<br>'.repeat(this.maxLines);
+      const lineHeight = element.offsetHeight / this.maxLines;
+      element.innerHTML = originalHtml;
+
+      return {
+        lineHeight,
+        innerHeight,
+      };
+    });
   }
 
   /**
    * @param {Boolean} [doInitialClamp]
    * If true, watch and clamp. If false, just watch.
    */
-  watch (doInitialClamp = false) {
+  watch(doInitialClamp = false) {
     if (doInitialClamp) {
       this.clamp();
     }
@@ -133,7 +144,7 @@ export default class LineClamp {
     return this;
   }
 
-  unwatch () {
+  unwatch() {
     this.observer.disconnect();
     window.removeEventListener('resize', this.updateHandler);
 
@@ -145,7 +156,7 @@ export default class LineClamp {
    * Conduct either soft clamping or hard clamping, according to the value of
    * property {@see useSoftClamp}.
    */
-  clamp () {
+  clamp() {
     if (this._element.offsetHeight) {
       const previouslyWatching = this._watching;
 
@@ -171,10 +182,11 @@ export default class LineClamp {
   /**
    * Trims text content to force it to fit within the demanded number of lines.
    */
-  hardClamp () {
+  hardClamp() {
     if (this.shouldClamp()) {
       for (let i = 0, len = this.originalWords.length; i < len; ++i) {
-        let currentText = this.originalWords.slice(0, i).join(' ');
+        let currentText = this.originalWords.slice(0, i)
+          .join(' ');
         this._element.textContent = currentText;
 
         if (this.shouldClamp()) {
@@ -201,7 +213,7 @@ export default class LineClamp {
    * Reduce font size until the text fits within the specified number of lines.
    * If it still doesn't fit, resort to using {@see hardClamp()}.
    */
-  softClamp () {
+  softClamp() {
     this._element.style.fontSize = '';
 
     if (this.shouldClamp()) {
@@ -229,29 +241,35 @@ export default class LineClamp {
     return this;
   }
 
-  shouldClamp () {
-    const style = this.computedStyle,
-      padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom),
-      innerHeight = parseInt(style.height, 10) - padding;
+  shouldClamp() {
+    const { innerHeight, lineHeight } = this.textDimensions;
+    const comparisonLineHeight = this.strict ? lineHeight : this.basisLineHeight;
 
-    if (this.strict) {
-      return innerHeight / this.currentLineHeight > this.maxLines;
-    }
-
-    return innerHeight / this.basisLineHeight > this.maxLines;
+    return innerHeight / comparisonLineHeight > this.maxLines;
   }
 
-  _whileMeasuring (callback) {
+  _whileMeasuring(callback) {
     const previouslyWatching = this._watching;
-    const startingCssText = this._element.style.cssText;
+    const oldStyles = this._element.style.cssText;
+    const stylesToZeroOut = [
+      'min-height',
+      'border-top-width',
+      'border-bottom-width',
+      'padding-top-width',
+      'padding-bottom-width',
+    ];
+    const newStyles = stylesToZeroOut
+      .map(rule => `${rule}:0!important`)
+      .join(';');
+
     this.unwatch();
 
-    for (const property of ['minHeight', 'borderWidth', 'padding']) {
-      this._element.style[property] = '0!important';
-    }
+    // Append, don't replace
+    this._element.style.cssText += ';' + stylesToZeroOut;
 
+    // Execute callback while reliable measurements can be made
     const returnValue = callback(this._element);
-    this._element.style.cssText = startingCssText;
+    this._element.style.cssText = oldStyles;
 
     if (previouslyWatching) {
       this.watch(false);
