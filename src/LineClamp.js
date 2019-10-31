@@ -1,10 +1,4 @@
 /**
- * @todo test non left-to-right text
- * @todo Account for characters that cause tall lines (emojis, Zalgot text)
- * @todo Function with HTML nodes? Hard. Only maybe doable.
- * @todo Enable fitting and *filling* specified dimensions
- */
-/**
  * @typedef {Object} LineClampInit
  *
  * @property {Number} maxLines
@@ -37,26 +31,14 @@
 /**
  * @typedef {Object} TextDimensions
  *
- * @property {lineHeight}
- * The current height of one line of text.
+ * @property {firstLineHeight}
+ * The height of the first line of text. This is the height of the element when
+ * it contains only one line of text.
+
+ * @property {additionalLineHeight}
+ * The height that each line of text after the first adds to the element.
  *
- * <strong>Note</strong>: For inline elements, CSS inheritance of the
- * line-height property may cause this value to be smaller when
- * there is only one line of text than when there are multiple.
- *
- * This value reflects the practical height of one line of text when measured.
- * If there is only one line of text, this value will reflect the height of
- * that line.
- *
- * If there are multiple lines, this value will reflect the height of the
- * element with two lines of text in it - which may be more than double the
- * height of the element when it only had one line of text - divided by two.
- *
- * Also, if your text has characters that "distort" line heights, this value may not
- * match the line height you observe.
- *
- * @property {innerHeight} The height of the element with its current
- * text, minus border and padding.
+ * @property {lineCount} The number of lines of text the element contains.
  */
 
 const events = new WeakMap();
@@ -66,6 +48,10 @@ const triggerEvent = (instance, type) => {
 
 /**
  * Reduces font size or trims text to make it fit within specified bounds.
+ *
+ * @todo test non left-to-right text
+ * @todo Account for characters that cause tall lines (emojis, Zalgot text)
+ * @todo Function with HTML nodes? Hard. Only maybe doable.
  */
 export default class LineClamp {
   /**
@@ -106,7 +92,7 @@ export default class LineClamp {
     this.maxLines = maxLines;
 
     if (undefined === basisLineHeight) {
-      basisLineHeight = this.currentLineHeight;
+      basisLineHeight = this.textDimensions.firstLineHeight;
     }
 
     if (undefined === maxFontSize) {
@@ -118,10 +104,6 @@ export default class LineClamp {
     this.basisLineHeight = basisLineHeight;
     this.minFontSize = minFontSize;
     this.maxFontSize = maxFontSize;
-  }
-
-  get currentLineHeight() {
-    return this.textDimensions.lineHeight;
   }
 
   /**
@@ -144,23 +126,22 @@ export default class LineClamp {
       element.innerHTML = '&nbsp;';
 
       // Get height of element with only one line of text
-      let lineHeight = element.offsetHeight;
+      const firstLineHeight = element.offsetHeight;
 
-      // Element has more than one line of text
-      if (lineHeight < innerHeight) {
-        // Add another line
-        element.innerHTML += '<br>&nbsp;';
+      // Add another line
+      element.innerHTML += '<br>&nbsp;';
 
-        // CSS inheritance may increase practical line height when # of lines > 1
-        lineHeight = element.offsetHeight / 2;
-      }
+      const additionalLineHeight = element.offsetHeight - firstLineHeight;
+      const lineCount = 1 + (innerHeight - firstLineHeight) / additionalLineHeight;
 
       // Restore original content
       element.innerHTML = originalHtml;
 
       return {
-        lineHeight,
-        innerHeight,
+        firstLineHeight,
+        additionalLineHeight,
+        lineCount,
+        innerHeight
       };
     });
   }
@@ -290,10 +271,12 @@ export default class LineClamp {
   }
 
   shouldClamp() {
-    const { innerHeight, lineHeight } = this.textDimensions;
-    const comparisonLineHeight = this.strict ? lineHeight : this.basisLineHeight;
+    const {lineCount, innerHeight} = this.textDimensions;
+    if (this.strict) {
+      return lineCount > this.maxLines;
+    }
 
-    return innerHeight / comparisonLineHeight > this.maxLines;
+    return innerHeight / this.basisLineHeight > this.maxLines;
   }
 
   /**
@@ -309,8 +292,8 @@ export default class LineClamp {
       'min-height',
       'border-top-width',
       'border-bottom-width',
-      'padding-top-width',
-      'padding-bottom-width',
+      'padding-top',
+      'padding-bottom',
     ];
 
     // Unwatch before beginning our own mutations, lest we recurse

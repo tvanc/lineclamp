@@ -2,6 +2,11 @@
     box-sizing: border-box;
 }
 
+@font-face {
+    font-family: "Ahem";
+    src: url("ahem.ttf");
+}
+
 #mocha .test pre.error {
     white-space: pre-wrap;
 }
@@ -16,4 +21,11 @@
 
 .tester:last-child {
     background: powderblue;
+}
+
+.ahem {
+    color: rgba(200, 255, 200, 0.5);
+    background: rgba(255, 200, 200, 0.8);
+    font-family: "Ahem", sans-serif;
+    word-wrap: break-word;
 }

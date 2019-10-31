@@ -13,7 +13,7 @@ describe('LineClamp', () => {
     clamp.clamp();
 
     assert.equal(
-      clamp.currentLineHeight,
+      clamp.textDimensions.firstLineHeight,
       element.clientHeight,
       'Element reduced to one strict line.'
     );
@@ -26,11 +26,11 @@ describe('LineClamp', () => {
       strict:   false,
     });
 
-    const startingLineHeight = clamp.currentLineHeight;
+    const startingLineHeight = clamp.textDimensions.firstLineHeight;
 
     clamp.clamp();
 
-    const currentLineHeight = clamp.currentLineHeight;
+    const currentLineHeight = clamp.textDimensions.firstLineHeight;
     const currentHeight = element.clientHeight;
 
     assert.isAbove(
@@ -62,7 +62,7 @@ describe('LineClamp', () => {
     clamp.clamp();
 
     assert.isTrue(
-      element.clientHeight === clamp.currentLineHeight,
+      element.clientHeight === clamp.textDimensions.firstLineHeight,
       'Element is only one line high'
     );
   });
@@ -141,11 +141,11 @@ describe('LineClamp', () => {
 
   it('Padding, border, min-height, and font-size are taken into account', () => {
     const element = document.getElementById('dimensionsTester');
-    const clamp = new LineClamp(element, {maxLines: 2});
+    const clamp = new LineClamp(element, {maxLines: 1});
 
     clamp.clamp();
 
-    const currentLineHeight = clamp.currentLineHeight;
+    const currentLineHeight = clamp.textDimensions.firstLineHeight;
     const currentHeight = element.offsetHeight;
 
     assert.isAbove(
@@ -156,13 +156,13 @@ describe('LineClamp', () => {
   });
 
   it('Works for inline text', () => {
+    // We have to just take this for granted. There's no other way to get the
+    // number of lines to test against.
+    const expectedLineCount = 3;
     const element = document.getElementById('displayInlineTester');
-    const clamp = new LineClamp(element, {maxLines: 2});
+    const clamp = new LineClamp(element, {maxLines: expectedLineCount});
 
-    clamp.clamp();
-
-    const {innerHeight, lineHeight} = clamp.textDimensions;
-
-    assert.equal(innerHeight, lineHeight * 2, 'Inline text is correct height.');
+    // How do I prove there are three lines algorithmically?
+    assert.equal(clamp.textDimensions.lineCount, expectedLineCount, 'Inline text is correct height.');
   });
 });
