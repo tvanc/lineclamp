@@ -41,7 +41,6 @@
  * @property {lineCount} The number of lines of text the element contains.
  */
 
-const events = new WeakMap();
 const triggerEvent = (instance, type) => {
   instance._element.dispatchEvent(new CustomEvent(type));
 };
@@ -122,26 +121,34 @@ export default class LineClamp {
       const originalHtml = element.innerHTML;
       const innerHeight = element.offsetHeight;
 
+      element.innerHTML = '';
+      const emptyHeight = element.offsetHeight;
+
       // Fill element with single non-breaking space to find height of one line
       element.innerHTML = '&nbsp;';
 
       // Get height of element with only one line of text
-      const firstLineHeight = element.offsetHeight;
+      const heightWithOneLine = element.offsetHeight;
+      const firstLineHeight = heightWithOneLine === emptyHeight
+        ? heightWithOneLine
+        : heightWithOneLine - emptyHeight;
 
       // Add another line
       element.innerHTML += '<br>&nbsp;';
 
-      const additionalLineHeight = element.offsetHeight - firstLineHeight;
-      const lineCount = 1 + (innerHeight - firstLineHeight) / additionalLineHeight;
+      const additionalLineHeight = element.offsetHeight - heightWithOneLine;
+      const lineCount = 1 + (innerHeight - heightWithOneLine) / additionalLineHeight;
 
       // Restore original content
       element.innerHTML = originalHtml;
 
       return {
+        innerHeight,
+        emptyHeight,
+        heightWithOneLine,
         firstLineHeight,
         additionalLineHeight,
-        lineCount,
-        innerHeight
+        lineCount
       };
     });
   }
