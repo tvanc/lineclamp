@@ -214,8 +214,7 @@ export default class LineClamp {
   hardClamp() {
     if (this.shouldClamp()) {
       for (let i = 0, len = this.originalWords.length; i < len; ++i) {
-        let currentText = this.originalWords.slice(0, i)
-          .join(' ');
+        let currentText = this.originalWords.slice(0, i).join(' ');
         this._element.textContent = currentText;
 
         if (this.shouldClamp()) {
@@ -288,21 +287,12 @@ export default class LineClamp {
   _whileMeasuring(callback) {
     const previouslyWatching = this._watching;
     const oldStyles = this._element.style.cssText;
-    const propertiesToZeroOut = [
-      'min-height',
-      'border-top-width',
-      'border-bottom-width',
-      'padding-top',
-      'padding-bottom',
-    ];
 
     // Unwatch before beginning our own mutations, lest we recurse
     this.unwatch();
 
     // Append, don't replace
-    this._element.style.cssText += ';' + propertiesToZeroOut
-      .map(property => `${property}:0!important`)
-      .join(';');
+    this._element.style.cssText += ';min-height:0!important';
 
     // Execute callback while reliable measurements can be made
     const returnValue = callback(this._element);
