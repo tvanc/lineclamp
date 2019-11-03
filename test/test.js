@@ -13,7 +13,7 @@ describe('LineClamp', () => {
     clamp.clamp();
 
     assert.equal(
-      clamp.textDimensions.firstLineHeight,
+      clamp.textMetrics.firstLineHeight,
       element.clientHeight,
       'Element reduced to one strict line.'
     );
@@ -22,12 +22,12 @@ describe('LineClamp', () => {
   it('Limits to height of one line in original font size.', () => {
     const element = document.getElementById('heightTester');
     const clamp = new LineClamp(element);
-    const startingLineHeight = clamp.textDimensions.firstLineHeight;
+    const startingLineHeight = clamp.textMetrics.firstLineHeight;
     clamp.maxHeight = startingLineHeight;
 
     clamp.clamp();
 
-    const currentLineHeight = clamp.textDimensions.firstLineHeight;
+    const currentLineHeight = clamp.textMetrics.firstLineHeight;
     const currentHeight = element.clientHeight;
 
     assert.isAbove(
@@ -59,7 +59,7 @@ describe('LineClamp', () => {
     clamp.clamp();
 
     assert.isTrue(
-      element.clientHeight === clamp.textDimensions.firstLineHeight,
+      element.clientHeight === clamp.textMetrics.firstLineHeight,
       'Element is only one line high'
     );
   });
@@ -142,7 +142,7 @@ describe('LineClamp', () => {
 
     clamp.clamp();
 
-    const currentLineHeight = clamp.textDimensions.firstLineHeight;
+    const currentLineHeight = clamp.textMetrics.firstLineHeight;
     const currentHeight = element.offsetHeight;
 
     assert.isAbove(
@@ -160,6 +160,6 @@ describe('LineClamp', () => {
     const clamp = new LineClamp(element, {maxLines: expectedLineCount});
 
     // How do I prove there are three lines algorithmically?
-    assert.equal(clamp.textDimensions.lineCount, expectedLineCount, 'Inline text is correct height.');
+    assert.equal(clamp.textMetrics.lineCount, expectedLineCount, 'Inline text is correct height.');
   });
 });

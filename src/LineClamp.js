@@ -1,5 +1,5 @@
 const triggerEvent = (instance, type) => {
-  instance._element.dispatchEvent(new CustomEvent(type));
+  instance.element.dispatchEvent(new CustomEvent(type));
 };
 
 /**
@@ -66,7 +66,7 @@ export default class LineClamp {
       value:    new MutationObserver(this.updateHandler),
     });
 
-    this._element = element;
+    this.element = element;
 
     const style = this.computedStyle;
 
@@ -87,41 +87,55 @@ export default class LineClamp {
    * @returns {CSSStyleDeclaration}
    */
   get computedStyle() {
-    return window.getComputedStyle(this._element);
+    return window.getComputedStyle(this.element);
   }
 
   /**
-   * @returns {TextDimensions}
+   * @returns {TextMetrics}
    */
-  get textDimensions() {
-    return this._whileMeasuring(element => {
+  get textMetrics() {
+    return this.whileMeasuring(element => {
       const originalHtml = element.innerHTML;
-      const innerHeight = element.offsetHeight;
+      const heightWithText = element.offsetHeight;
 
       element.innerHTML = '';
-      const emptyHeight = element.offsetHeight;
+      const heightWithoutText = element.offsetHeight;
+      const textHeight = heightWithText - heightWithoutText;
 
       // Fill element with single non-breaking space to find height of one line
       element.innerHTML = '&nbsp;';
 
       // Get height of element with only one line of text
       const heightWithOneLine = element.offsetHeight;
-      const firstLineHeight = heightWithOneLine === emptyHeight
+      const firstLineHeight = heightWithOneLine === heightWithoutText
         ? heightWithOneLine
-        : heightWithOneLine - emptyHeight;
+        : heightWithOneLine - heightWithoutText;
 
       // Add another line
       element.innerHTML += '<br>&nbsp;';
 
       const additionalLineHeight = element.offsetHeight - heightWithOneLine;
-      const lineCount = 1 + (innerHeight - heightWithOneLine) / additionalLineHeight;
+      const lineCount = 1 + (heightWithText - heightWithOneLine) / additionalLineHeight;
 
       // Restore original content
       element.innerHTML = originalHtml;
 
       /**
-       * @typedef {Object} TextDimensions
+       * @typedef {Object} TextMetrics
        *
+       * @property {heightWithText}
+       * The height of the element with its current text contents.
+       *
+       * @property {heightWithoutText}
+       * The height of the element without any text.
+       *
+       * @property {textHeight}
+       * The vertical space taken up by text.
+       *
+       * @property {heightWithOneLine}
+       * The height of the element with only one line of text and without
+       * minimum or maximum heights.
+
        * @property {firstLineHeight}
        * The height of the first line of text. This is the height of the element when
        * it contains only one line of text.
@@ -129,11 +143,13 @@ export default class LineClamp {
        * @property {additionalLineHeight}
        * The height that each line of text after the first adds to the element.
        *
-       * @property {lineCount} The number of lines of text the element contains.
+       * @property {lineCount}
+       * The number of lines of text the element contains.
        */
       return {
-        innerHeight,
-        emptyHeight,
+        heightWithText,
+        heightWithoutText,
+        textHeight,
         heightWithOneLine,
         firstLineHeight,
         additionalLineHeight,
@@ -143,20 +159,15 @@ export default class LineClamp {
   }
 
   /**
-   * @param {Boolean} [doInitialClamp]
-   * If true, watch and clamp. If false, just watch.
+   * Watch for changes that may affect layout and reclamp if necessary.
    */
-  watch(doInitialClamp = false) {
-    if (doInitialClamp) {
-      this.clamp();
-    }
-
+  watch() {
     if (!this._watching) {
       window.addEventListener('resize', this.updateHandler);
 
       // Minimum required to detect changes to text nodes,
       // and wholesale replacement via innerHTML
-      this.observer.observe(this._element, {
+      this.observer.observe(this.element, {
         characterData: true,
         subtree:       true,
         childList:     true,
@@ -169,6 +180,11 @@ export default class LineClamp {
     return this;
   }
 
+  /**
+   * Stop watching for layout changes.
+   *
+   * @returns {LineClamp}
+   */
   unwatch() {
     this.observer.disconnect();
     window.removeEventListener('resize', this.updateHandler);
@@ -182,7 +198,7 @@ export default class LineClamp {
    * property {@see useSoftClamp}.
    */
   clamp() {
-    if (this._element.offsetHeight) {
+    if (this.element.offsetHeight) {
       const previouslyWatching = this._watching;
 
       // Ignore internally started mutations, lest we recurse into oblivion
@@ -205,18 +221,18 @@ export default class LineClamp {
   }
 
   /**
-   * Trims text content to force it to fit within the demanded number of lines.
+   * Trims text until it fits within constraints.
    */
   hardClamp() {
     if (this.shouldClamp()) {
       for (let i = 0, len = this.originalWords.length; i < len; ++i) {
         let currentText = this.originalWords.slice(0, i).join(' ');
-        this._element.textContent = currentText;
+        this.element.textContent = currentText;
 
         if (this.shouldClamp()) {
           do {
             currentText = currentText.slice(0, -1);
-            this._element.innerHTML = currentText + this.ellipsis;
+            this.element.innerHTML = currentText + this.ellipsis;
           }
           while (this.shouldClamp());
 
@@ -228,23 +244,23 @@ export default class LineClamp {
       triggerEvent(this, 'lineclamp.clamp');
     }
 
-    this._element.style.removeProperty('min-height');
+    this.element.style.removeProperty('min-height');
 
     return this;
   }
 
   /**
-   * Reduce font size until the text fits within the specified number of lines.
-   * If it still doesn't fit, resort to using {@see hardClamp()}.
+   * Reduces font size until the text fits within the specified number of lines.
+   * If it still doesn't fit, resorts to using {@see hardClamp()}.
    */
   softClamp() {
-    this._element.style.fontSize = '';
+    this.element.style.fontSize = '';
 
     if (this.shouldClamp()) {
       let done = false;
 
       for (let i = this.maxFontSize; i >= this.minFontSize; --i) {
-        this._element.style.fontSize = `${i}px`;
+        this.element.style.fontSize = `${i}px`;
         if (!this.shouldClamp()) {
           done = true;
 
@@ -266,10 +282,10 @@ export default class LineClamp {
   }
 
   shouldClamp() {
-    const {lineCount, innerHeight} = this.textDimensions;
+    const {lineCount, heightWithText} = this.textMetrics;
 
     if (undefined !== this.maxHeight) {
-      return innerHeight > this.maxHeight;
+      return heightWithText > this.maxHeight;
     }
 
     if (this.maxLines) {
@@ -284,20 +300,20 @@ export default class LineClamp {
    * @returns {*}
    * @private
    */
-  _whileMeasuring(callback) {
+  whileMeasuring(callback) {
     const previouslyWatching = this._watching;
-    const oldStyles = this._element.style.cssText;
+    const oldStyles = this.element.style.cssText;
     const newStyles = 'min-height:0!important;max-height:none!important';
 
     // Unwatch before beginning our own mutations, lest we recurse
     this.unwatch();
 
     // Append, don't replace
-    this._element.style.cssText += ';' + newStyles;
+    this.element.style.cssText += ';' + newStyles;
 
     // Execute callback while reliable measurements can be made
-    const returnValue = callback(this._element);
-    this._element.style.cssText = oldStyles;
+    const returnValue = callback(this.element);
+    this.element.style.cssText = oldStyles;
 
     if (previouslyWatching) {
       this.watch(false);
