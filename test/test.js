@@ -138,7 +138,7 @@ describe('LineClamp', () => {
 
   it('Padding, border, min-height, and font-size are taken into account', () => {
     const element = document.getElementById('dimensionsTester');
-    const clamp = new LineClamp(element, {maxLines: 1});
+    const clamp = new LineClamp(element);
 
     clamp.clamp();
 

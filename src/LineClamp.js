@@ -5,11 +5,16 @@ const triggerEvent = (instance, type) => {
 /**
  * Reduces font size or trims text to make it fit within specified bounds.
  *
- * @todo test non left-to-right text
- * @todo Account for characters that cause tall lines (emojis, Zalgot text)
- * @todo Function with HTML nodes? Hard. Only maybe doable.
+ * Supports clamping by number of lines or text height.
  *
- * @property
+ * Known limitations:
+ * 1. Characters that distort line heights (emojis, zalgo) may cause
+ * unexpected results.
+ * 2. Calling {@see hardClamp()} wipes child elements. Future updates may allow
+ * inline child elements to be preserved.
+ *
+ * @todo Split text metrics into own library
+ * @todo Test non-LTR text
  */
 export default class LineClamp {
   /**
@@ -17,7 +22,7 @@ export default class LineClamp {
    * The element to clamp.
    *
    * @param {Object} [options]
-   * Options for the behavior of the line clamp.
+   * Options to govern clamping behavior.
    *
    * @param {number} [options.maxLines]
    * The maximum number of lines to allow. Defaults to 1.
@@ -26,22 +31,26 @@ export default class LineClamp {
    * @param {number} [options.maxHeight]
    * The maximum height (in pixels) of text in an element.
    * This option is undefined by default. Once set, it takes precedent over
-   * {@see maxLines}.
+   * {@see maxLines}. Note that this applies to the height of the text, not
+   * the element itself. Restricting the height of the element can be achieved
+   * with CSS <code>max-height</code>.
    *
    * @param {boolean} [options.useSoftClamp]
-   * If true, try reducing font size before trimming text.
+   * If true, reduce font size (soft clamp) to at least {@see minFontSize}
+   * before resorting to trimming text.
    *
    * @param {string} [options.ellipsis]
    * The character with which to represent clipped trailing text.
    * This option takes effect when "hard" clamping is used.
    *
    * @param {number} [options.minFontSize]
-   * The lowest font size to try before resorting to removing trailing text
-   * (hard clamping). Defaults to 1.
+   * The lowest font size, in pixels, to try before resorting to removing
+   * trailing text (hard clamping). Defaults to 1.
    *
    * @param {number} [options.maxFontSize]
-   * The max font size. We'll start with this font size then reduce until
-   * text fits constraints, or font size is equal to {@see minFontSize}.
+   * The maximum font size in pixels. We'll start with this font size then
+   * reduce until text fits constraints, or font size is equal to
+   * {@see minFontSize}. Defaults to the element's initial computed font size.
    */
   constructor(element, {
     maxLines = 1,
@@ -66,17 +75,13 @@ export default class LineClamp {
       value:    new MutationObserver(this.updateHandler),
     });
 
-    this.element = element;
-
-    const style = this.computedStyle;
-
-    this.maxLines = maxLines;
-    this.maxHeight = maxHeight;
-
     if (undefined === maxFontSize) {
-      maxFontSize = parseInt(style.fontSize, 10);
+      maxFontSize = parseInt(window.getComputedStyle(element).fontSize, 10);
     }
 
+    this.element = element;
+    this.maxLines = maxLines;
+    this.maxHeight = maxHeight;
     this.useSoftClamp = useSoftClamp;
     this.minFontSize = minFontSize;
     this.maxFontSize = maxFontSize;
@@ -84,38 +89,32 @@ export default class LineClamp {
   }
 
   /**
-   * @returns {CSSStyleDeclaration}
-   */
-  get computedStyle() {
-    return window.getComputedStyle(this.element);
-  }
-
-  /**
    * @returns {TextMetrics}
+   * Layout metrics for for the clamped element's text.
    */
   get textMetrics() {
     return this.whileMeasuring(element => {
       const originalHtml = element.innerHTML;
-      const heightWithText = element.offsetHeight;
+      const naturalHeight = element.offsetHeight;
 
       element.innerHTML = '';
-      const heightWithoutText = element.offsetHeight;
-      const textHeight = heightWithText - heightWithoutText;
+      const naturalHeightWithoutText = element.offsetHeight;
+      const textHeight = naturalHeight - naturalHeightWithoutText;
 
       // Fill element with single non-breaking space to find height of one line
       element.innerHTML = '&nbsp;';
 
       // Get height of element with only one line of text
-      const heightWithOneLine = element.offsetHeight;
-      const firstLineHeight = heightWithOneLine === heightWithoutText
-        ? heightWithOneLine
-        : heightWithOneLine - heightWithoutText;
+      const naturalHeightWithOneLine = element.offsetHeight;
+      const firstLineHeight = naturalHeightWithOneLine - naturalHeightWithoutText;
 
       // Add another line
       element.innerHTML += '<br>&nbsp;';
 
-      const additionalLineHeight = element.offsetHeight - heightWithOneLine;
-      const lineCount = 1 + (heightWithText - heightWithOneLine) / additionalLineHeight;
+      const additionalLineHeight = element.offsetHeight - naturalHeightWithOneLine;
+      const lineCount = 1 + (
+        (naturalHeight - naturalHeightWithOneLine) / additionalLineHeight
+      );
 
       // Restore original content
       element.innerHTML = originalHtml;
@@ -123,22 +122,19 @@ export default class LineClamp {
       /**
        * @typedef {Object} TextMetrics
        *
-       * @property {heightWithText}
-       * The height of the element with its current text contents.
-       *
-       * @property {heightWithoutText}
-       * The height of the element without any text.
-       *
        * @property {textHeight}
-       * The vertical space taken up by text.
+       * The vertical space required for the element's current text.
        *
-       * @property {heightWithOneLine}
+       * @property {naturalHeightWithOneLine}
        * The height of the element with only one line of text and without
-       * minimum or maximum heights.
-
+       * minimum or maximum heights. This information may be helpful when
+       * dealing with inline elements (and potentially other scenarios), where
+       * the first line of text does not increase the element's height.
+       *
        * @property {firstLineHeight}
-       * The height of the first line of text. This is the height of the element when
-       * it contains only one line of text.
+       * The height that the first line of text adds to the element, i.e., the
+       * difference between the height of the element while empty and the height
+       * of the element while it contains one line of text.
 
        * @property {additionalLineHeight}
        * The height that each line of text after the first adds to the element.
@@ -147,19 +143,48 @@ export default class LineClamp {
        * The number of lines of text the element contains.
        */
       return {
-        heightWithText,
-        heightWithoutText,
         textHeight,
-        heightWithOneLine,
+        naturalHeightWithOneLine,
         firstLineHeight,
         additionalLineHeight,
-        lineCount
+        lineCount,
       };
     });
   }
 
   /**
-   * Watch for changes that may affect layout and reclamp if necessary.
+   * Execute a callback while the element is in a state conducive to gathering
+   * text metrics (i.e., minimum and maximum height are unset).
+   *
+   * @param callback
+   * @returns {*}
+   * @private
+   */
+  whileMeasuring(callback) {
+    const previouslyWatching = this._watching;
+    const oldStyles = this.element.style.cssText;
+    const newStyles = 'min-height:0!important;max-height:none!important';
+
+    // Unwatch before beginning our own mutations, lest we recurse
+    this.unwatch();
+
+    // Append, don't replace
+    this.element.style.cssText += ';' + newStyles;
+
+    // Execute callback while reliable measurements can be made
+    const returnValue = callback(this.element);
+    this.element.style.cssText = oldStyles;
+
+    if (previouslyWatching) {
+      this.watch(false);
+    }
+
+    return returnValue;
+  }
+
+  /**
+   * Watch for changes that may affect layout. Respond by reclamping if
+   * necessary.
    */
   watch() {
     if (!this._watching) {
@@ -190,6 +215,7 @@ export default class LineClamp {
     window.removeEventListener('resize', this.updateHandler);
 
     this._watching = false;
+
     return this;
   }
 
@@ -221,12 +247,17 @@ export default class LineClamp {
   }
 
   /**
-   * Trims text until it fits within constraints.
+   * Trims text until it fits within constraints
+   * (maximum height or number of lines).
+   *
+   * @see {maxLines}
+   * @see {maxHeight}
    */
   hardClamp() {
     if (this.shouldClamp()) {
       for (let i = 0, len = this.originalWords.length; i < len; ++i) {
-        let currentText = this.originalWords.slice(0, i).join(' ');
+        let currentText = this.originalWords.slice(0, i)
+          .join(' ');
         this.element.textContent = currentText;
 
         if (this.shouldClamp()) {
@@ -240,6 +271,7 @@ export default class LineClamp {
         }
       }
 
+      // Broadcast more specific hardClamp event first
       triggerEvent(this, 'lineclamp.hardClamp');
       triggerEvent(this, 'lineclamp.clamp');
     }
@@ -268,12 +300,16 @@ export default class LineClamp {
         }
       }
 
+      // Emit specific softClamp event first
       triggerEvent(this, 'lineclamp.softClamp');
 
+      // Don't emit `lineclamp.clamp` event twice.
       if (!done) {
         this.hardClamp();
       }
       else {
+        // hardClamp emits `lineclamp.clamp` too. Only emit from here if we're
+        // not also hard clamping.
         triggerEvent(this, 'lineclamp.clamp');
       }
     }
@@ -281,44 +317,24 @@ export default class LineClamp {
     return this;
   }
 
+  /**
+   * @returns {boolean}
+   * Whether height of text or number of lines exceed constraints.
+   *
+   * @see maxHeight
+   * @see maxLines
+   */
   shouldClamp() {
-    const {lineCount, heightWithText} = this.textMetrics;
+    const { lineCount, textHeight } = this.textMetrics;
 
     if (undefined !== this.maxHeight) {
-      return heightWithText > this.maxHeight;
+      return textHeight > this.maxHeight;
     }
 
-    if (this.maxLines) {
+    if (undefined !== this.maxLines) {
       return lineCount > this.maxLines;
     }
 
     throw new Error('maxLines or maxHeight must be set before calling shouldClamp().');
-  }
-
-  /**
-   * @param callback
-   * @returns {*}
-   * @private
-   */
-  whileMeasuring(callback) {
-    const previouslyWatching = this._watching;
-    const oldStyles = this.element.style.cssText;
-    const newStyles = 'min-height:0!important;max-height:none!important';
-
-    // Unwatch before beginning our own mutations, lest we recurse
-    this.unwatch();
-
-    // Append, don't replace
-    this.element.style.cssText += ';' + newStyles;
-
-    // Execute callback while reliable measurements can be made
-    const returnValue = callback(this.element);
-    this.element.style.cssText = oldStyles;
-
-    if (previouslyWatching) {
-      this.watch(false);
-    }
-
-    return returnValue;
   }
 }
