@@ -10,7 +10,7 @@ describe('LineClamp', () => {
       strict:   true,
     });
 
-    clamp.clamp();
+    clamp.apply();
 
     assert.equal(
       clamp.calculateTextMetrics().firstLineHeight,
@@ -25,7 +25,7 @@ describe('LineClamp', () => {
     const startingLineHeight = clamp.calculateTextMetrics().firstLineHeight;
     clamp.maxHeight = startingLineHeight;
 
-    clamp.clamp();
+    clamp.apply();
 
     const currentLineHeight = clamp.calculateTextMetrics().firstLineHeight;
     const currentHeight = element.clientHeight;
@@ -56,7 +56,7 @@ describe('LineClamp', () => {
       useSoftClamp: false,
     });
 
-    clamp.clamp();
+    clamp.apply();
 
     const {firstLineHeight} = clamp.calculateTextMetrics();
 
@@ -77,7 +77,7 @@ describe('LineClamp', () => {
     const softClampSpy = chai.spy.on(clamp, 'softClamp');
     const hardClampSpy = chai.spy.on(clamp, 'hardClamp');
 
-    clamp.clamp();
+    clamp.apply();
 
     expect(softClampSpy).to.have.been.called();
     expect(hardClampSpy).to.have.been.called();
@@ -111,7 +111,7 @@ describe('LineClamp', () => {
       () => plainClampTriggeredLast = hardClampTriggeredNext
     );
 
-    clamp.clamp();
+    clamp.apply();
 
     assert(softClampTriggeredFirst, 'Soft clamp triggered first');
     assert(hardClampTriggeredNext, 'Hard clamp triggered next');
@@ -121,7 +121,7 @@ describe('LineClamp', () => {
   it('Reclamps on DOM mutation', done => {
     const element = document.getElementById('mutationTester');
     const clamp = new LineClamp(element, {minFontSize: 48});
-    const clampSpy = chai.spy.on(clamp, 'clamp');
+    const clampSpy = chai.spy.on(clamp, 'apply');
 
     clamp.watch();
 
@@ -142,7 +142,7 @@ describe('LineClamp', () => {
     const element = document.getElementById('dimensionsTester');
     const clamp = new LineClamp(element);
 
-    clamp.clamp();
+    clamp.apply();
 
     const {firstLineHeight} = clamp.calculateTextMetrics();
     const currentHeight = element.offsetHeight;

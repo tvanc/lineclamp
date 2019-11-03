@@ -67,7 +67,7 @@ export default class LineClamp {
 
     Object.defineProperty(this, 'updateHandler', {
       writable: false,
-      value:    () => this.clamp(),
+      value:    () => this.apply(),
     });
 
     Object.defineProperty(this, 'observer', {
@@ -226,7 +226,7 @@ export default class LineClamp {
    * Conduct either soft clamping or hard clamping, according to the value of
    * property {@see useSoftClamp}.
    */
-  clamp() {
+  apply() {
     if (this.element.offsetHeight) {
       const previouslyWatching = this._watching;
 
