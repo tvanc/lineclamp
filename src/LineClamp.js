@@ -89,10 +89,13 @@ export default class LineClamp {
   }
 
   /**
+   * Gather metrics about the layout of the element's text.
+   * This is a somewhat expensive operation - call with care.
+   *
    * @returns {TextMetrics}
-   * Layout metrics for for the clamped element's text.
+   * Layout metrics for the clamped element's text.
    */
-  get textMetrics() {
+  calculateTextMetrics() {
     return this.whileMeasuring(element => {
       const originalHtml = element.innerHTML;
       const naturalHeight = element.offsetHeight;
@@ -325,7 +328,7 @@ export default class LineClamp {
    * @see maxLines
    */
   shouldClamp() {
-    const { lineCount, textHeight } = this.textMetrics;
+    const { lineCount, textHeight } = this.calculateTextMetrics();
 
     if (undefined !== this.maxHeight) {
       return textHeight > this.maxHeight;

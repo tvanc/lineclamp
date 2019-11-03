@@ -13,7 +13,7 @@ describe('LineClamp', () => {
     clamp.clamp();
 
     assert.equal(
-      clamp.textMetrics.firstLineHeight,
+      clamp.calculateTextMetrics().firstLineHeight,
       element.clientHeight,
       'Element reduced to one strict line.'
     );
@@ -22,12 +22,12 @@ describe('LineClamp', () => {
   it('Limits to height of one line in original font size.', () => {
     const element = document.getElementById('heightTester');
     const clamp = new LineClamp(element);
-    const startingLineHeight = clamp.textMetrics.firstLineHeight;
+    const startingLineHeight = clamp.calculateTextMetrics().firstLineHeight;
     clamp.maxHeight = startingLineHeight;
 
     clamp.clamp();
 
-    const currentLineHeight = clamp.textMetrics.firstLineHeight;
+    const currentLineHeight = clamp.calculateTextMetrics().firstLineHeight;
     const currentHeight = element.clientHeight;
 
     assert.isAbove(
@@ -58,8 +58,10 @@ describe('LineClamp', () => {
 
     clamp.clamp();
 
+    const {firstLineHeight} = clamp.calculateTextMetrics();
+
     assert.isTrue(
-      element.clientHeight === clamp.textMetrics.firstLineHeight,
+      element.clientHeight === firstLineHeight,
       'Element is only one line high'
     );
   });
@@ -142,12 +144,12 @@ describe('LineClamp', () => {
 
     clamp.clamp();
 
-    const currentLineHeight = clamp.textMetrics.firstLineHeight;
+    const {firstLineHeight} = clamp.calculateTextMetrics();
     const currentHeight = element.offsetHeight;
 
     assert.isAbove(
       currentHeight,
-      currentLineHeight,
+      firstLineHeight,
       'Element is taller than the line height.'
     );
   });
@@ -158,8 +160,9 @@ describe('LineClamp', () => {
     const expectedLineCount = 3;
     const element = document.getElementById('displayInlineTester');
     const clamp = new LineClamp(element, {maxLines: expectedLineCount});
+    const {lineCount} = clamp.calculateTextMetrics();
 
     // How do I prove there are three lines algorithmically?
-    assert.equal(clamp.textMetrics.lineCount, expectedLineCount, 'Inline text is correct height.');
+    assert.equal(lineCount, expectedLineCount, 'Inline text is correct height.');
   });
 });
