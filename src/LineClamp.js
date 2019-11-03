@@ -1,4 +1,4 @@
-const triggerEvent = (instance, type) => {
+const emit = (instance, type) => {
   instance.element.dispatchEvent(new CustomEvent(type));
 };
 
@@ -275,8 +275,8 @@ export default class LineClamp {
       }
 
       // Broadcast more specific hardClamp event first
-      triggerEvent(this, 'lineclamp.hardClamp');
-      triggerEvent(this, 'lineclamp.clamp');
+      emit(this, 'lineclamp.hardClamp');
+      emit(this, 'lineclamp.clamp');
     }
 
     this.element.style.removeProperty('min-height');
@@ -304,7 +304,7 @@ export default class LineClamp {
       }
 
       // Emit specific softClamp event first
-      triggerEvent(this, 'lineclamp.softClamp');
+      emit(this, 'lineclamp.softClamp');
 
       // Don't emit `lineclamp.clamp` event twice.
       if (!done) {
@@ -313,7 +313,7 @@ export default class LineClamp {
       else {
         // hardClamp emits `lineclamp.clamp` too. Only emit from here if we're
         // not also hard clamping.
-        triggerEvent(this, 'lineclamp.clamp');
+        emit(this, 'lineclamp.clamp');
       }
     }
 
