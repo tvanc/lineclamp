@@ -20,13 +20,10 @@ describe('LineClamp', () => {
   });
 
   it('Limits to height of one line in original font size.', () => {
-    const element = document.getElementById('lenientTester');
-    const clamp = new LineClamp(element, {
-      maxLines: 1,
-      strict:   false,
-    });
-
+    const element = document.getElementById('heightTester');
+    const clamp = new LineClamp(element);
     const startingLineHeight = clamp.textDimensions.firstLineHeight;
+    clamp.maxHeight = startingLineHeight;
 
     clamp.clamp();
 
