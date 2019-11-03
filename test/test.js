@@ -21,7 +21,7 @@ describe('LineClamp', () => {
 
   it('Limits to height of one line in original font size.', () => {
     const element = document.getElementById('heightTester');
-    const clamp = new LineClamp(element);
+    const clamp = new LineClamp(element, {useSoftClamp: true});
     const startingLineHeight = clamp.calculateTextMetrics().firstLineHeight;
     clamp.maxHeight = startingLineHeight;
 
@@ -85,7 +85,7 @@ describe('LineClamp', () => {
 
   it('Events trigger properly', () => {
     const element = document.getElementById('eventsTester');
-    const clamp = new LineClamp(element);
+    const clamp = new LineClamp(element, {useSoftClamp: true});
 
     // Guarantee softClamp() will escalate to hardClamp()
     clamp.minFontSize = clamp.maxFontSize;

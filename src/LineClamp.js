@@ -37,7 +37,7 @@ export default class LineClamp {
    *
    * @param {boolean} [options.useSoftClamp]
    * If true, reduce font size (soft clamp) to at least {@see minFontSize}
-   * before resorting to trimming text.
+   * before resorting to trimming text. Defaults to false.
    *
    * @param {string} [options.ellipsis]
    * The character with which to represent clipped trailing text.
@@ -55,7 +55,7 @@ export default class LineClamp {
   constructor(element, {
     maxLines = 1,
     maxHeight = undefined,
-    useSoftClamp = true,
+    useSoftClamp = false,
     minFontSize = 1,
     maxFontSize = undefined,
     ellipsis = '…',
