@@ -26,7 +26,8 @@ clamp.watch();
 // Stop watching
 clamp.unwatch();
 
-// Get text metrics (height, number of lines)
+// Get text metrics (total height, number of lines, line heights)
+// https://github.com/tvanc/lineclamp#getting-text-metrics
 clamp.calculateTextMetrics();
 ```
 
@@ -41,6 +42,7 @@ clamp.calculateTextMetrics();
 | `softClamp()`   | Reduce font size until text height or line count are within constraints. If font size is reduced to `minFontSize` and text still exceeds constraints, resort to using `hardClamp()`. |
 | `hardClamp()`   | Trim text content to force it to fit within the maximum number of lines. |
 | `shouldClamp()` | Detect whether text exceeds the specified `maxHeight` or `maxLines`. |
+| `calculateTextMetrics()` |  |
 
 #### Options
 | Property       | Type    | Default     | Description |
@@ -60,3 +62,36 @@ Add listeners for these events to the clamped element.
 | `lineclamp.softclamp` | Emitted when the element is softly clamped. |
 | `lineclamp.hardclamp` | Emitted when the element is hard clamped. |
 | `lineclamp.clamp`     | Emitted when any kind of clamping occurs. If `.apply()` results in both soft and hard clamping, only one `lineclamp.clamp` event is issued, after `lineclamp.softclamp` and `lineclamp.hardclamp` have fired. |
+
+### Getting Text Metrics
+Unfortunately, there is no native API for counting the number of lines or
+determining line height. Computed line-height can be "normal". The next-best 
+option is to compare the height of the element with no text to the element's
+height when it has one line of text. That gets you the height of the first line.
+However, subsequent lines can have different heights than the first - though
+all subsequent lines will be the same height as each other 
+(barring things than can distort line heights, like certain characters). So you 
+have to add an additional line to know the height of the second line.
+
+This module does all that. The information it gleans is made available via the
+`calculateTextMetrics()` method:
+```javascript
+import LineClamp from '@tvanc/lineclamp';
+const element = document.getElementById('#long-marketing-title');
+
+// Create a clamp set to one line
+const clamp = new LineClamp(element);
+
+// Get text metrics
+const metrics = clamp.calculateTextMetrics();
+```
+
+`calculateTextMetrics()` returns an object with the following information.
+
+| Property | Description |
+| -------- | ----------- |
+| textHeight | The vertical space in pixels required to display the element's current text. |
+| naturalHeightWithOneLine | The height of the element with only one line of text and without minimum or maximum heights. |
+| firstLineHeight | The height that the first line of text adds to the element, i.e., the difference between the height of the element while empty and the height of the element while it contains one line of text. This number may be zero for inline elements because the first line of text does not increase the height of inline elements. |
+| additionalLineHeight | The height that each line of text after the first adds to the element. |
+| lineCount | The number of lines of text the element contains. |

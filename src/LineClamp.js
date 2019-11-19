@@ -124,7 +124,10 @@ export default class LineClamp {
        * @typedef {Object} TextMetrics
        *
        * @property {textHeight}
-       * The vertical space required for the element's current text.
+       * The vertical space required to display the element's current text.
+       * This is <em>not</em> necessarily the same as the height of the element.
+       * This number may even be greater than the element's height in cases
+       * where the text overflows the element's block axis.
        *
        * @property {naturalHeightWithOneLine}
        * The height of the element with only one line of text and without
