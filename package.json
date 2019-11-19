@@ -1,6 +1,6 @@
 {
   "name": "@tvanc/lineclamp",
-  "description": "Limit the number of lines of text in an element, or the amount of vertical space the text takes up.",
+  "description": "Limit an element's text to a given height or number of lines.",
   "main": "src/LineClamp.js",
   "scripts": {
     "test": "browser-sync start -s \"./\" -f \"./test/*\" \"./src/LineClamp.js\" --startPath \"test/test.html\""
@@ -10,9 +10,12 @@
     "url": "git+https://github.com/tvanc/lineclamp.git"
   },
   "keywords": [
-    "line-clamp",
     "lineclamp",
+    "line-clamp",
     "line clamp",
+    "textclamp",
+    "text-clamp",
+    "text clamp",
     "max lines",
     "text height"
   ],

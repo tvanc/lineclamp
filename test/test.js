@@ -95,13 +95,13 @@ describe('LineClamp', () => {
     let plainClampTriggeredLast = false;
 
     element.addEventListener(
-      'lineclamp.softClamp',
+      'lineclamp.softclamp',
       // Ensure correct order
       () => softClampTriggeredFirst = !hardClampTriggeredNext
     );
 
     element.addEventListener(
-      'lineclamp.hardClamp',
+      'lineclamp.hardclamp',
       // Ensure correct order
       () => hardClampTriggeredNext = softClampTriggeredFirst
     );
@@ -128,7 +128,7 @@ describe('LineClamp', () => {
     expect(clampSpy).not.to.have.been.called();
 
     element.addEventListener(
-      'lineclamp.hardClamp',
+      'lineclamp.hardclamp',
       () => {
         expect(clampSpy).to.have.been.called();
         done();

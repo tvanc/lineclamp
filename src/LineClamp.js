@@ -1,7 +1,3 @@
-const emit = (instance, type) => {
-  instance.element.dispatchEvent(new CustomEvent(type));
-};
-
 /**
  * Reduces font size or trims text to make it fit within specified bounds.
  *
@@ -30,7 +26,7 @@ export default class LineClamp {
    *
    * @param {number} [options.maxHeight]
    * The maximum height (in pixels) of text in an element.
-   * This option is undefined by default. Once set, it takes precedent over
+   * This option is undefined by default. Once set, it takes precedence over
    * {@see maxLines}. Note that this applies to the height of the text, not
    * the element itself. Restricting the height of the element can be achieved
    * with CSS <code>max-height</code>.
@@ -100,7 +96,9 @@ export default class LineClamp {
       const originalHtml = element.innerHTML;
       const naturalHeight = element.offsetHeight;
 
+      // Remove all content so we can measure the element's height
       element.innerHTML = '';
+
       const naturalHeightWithoutText = element.offsetHeight;
       const textHeight = naturalHeight - naturalHeightWithoutText;
 
@@ -137,7 +135,9 @@ export default class LineClamp {
        * @property {firstLineHeight}
        * The height that the first line of text adds to the element, i.e., the
        * difference between the height of the element while empty and the height
-       * of the element while it contains one line of text.
+       * of the element while it contains one line of text. This number may be
+       * zero for inline elements because the first line of text does not
+       * increase the height of inline elements.
 
        * @property {additionalLineHeight}
        * The height that each line of text after the first adds to the element.
@@ -224,7 +224,7 @@ export default class LineClamp {
 
   /**
    * Conduct either soft clamping or hard clamping, according to the value of
-   * property {@see useSoftClamp}.
+   * property {@see LineClamp.useSoftClamp}.
    */
   apply() {
     if (this.element.offsetHeight) {
@@ -253,14 +253,15 @@ export default class LineClamp {
    * Trims text until it fits within constraints
    * (maximum height or number of lines).
    *
-   * @see {maxLines}
-   * @see {maxHeight}
+   * @see {LineClamp.maxLines}
+   * @see {LineClamp.maxHeight}
    */
   hardClamp() {
     if (this.shouldClamp()) {
       for (let i = 0, len = this.originalWords.length; i < len; ++i) {
         let currentText = this.originalWords.slice(0, i)
           .join(' ');
+
         this.element.textContent = currentText;
 
         if (this.shouldClamp()) {
@@ -275,7 +276,7 @@ export default class LineClamp {
       }
 
       // Broadcast more specific hardClamp event first
-      emit(this, 'lineclamp.hardClamp');
+      emit(this, 'lineclamp.hardclamp');
       emit(this, 'lineclamp.clamp');
     }
 
@@ -285,8 +286,9 @@ export default class LineClamp {
   }
 
   /**
-   * Reduces font size until the text fits within the specified number of lines.
-   * If it still doesn't fit, resorts to using {@see hardClamp()}.
+   * Reduces font size until text fits within the specified height or number of
+   * lines. Resorts to using {@see hardClamp()} if text still exceeds clamp
+   * parameters.
    */
   softClamp() {
     this.element.style.fontSize = '';
@@ -304,7 +306,7 @@ export default class LineClamp {
       }
 
       // Emit specific softClamp event first
-      emit(this, 'lineclamp.softClamp');
+      emit(this, 'lineclamp.softclamp');
 
       // Don't emit `lineclamp.clamp` event twice.
       if (!done) {
@@ -324,8 +326,8 @@ export default class LineClamp {
    * @returns {boolean}
    * Whether height of text or number of lines exceed constraints.
    *
-   * @see maxHeight
-   * @see maxLines
+   * @see LineClamp.maxHeight
+   * @see LineClamp.maxLines
    */
   shouldClamp() {
     const { lineCount, textHeight } = this.calculateTextMetrics();
@@ -340,4 +342,8 @@ export default class LineClamp {
 
     throw new Error('maxLines or maxHeight must be set before calling shouldClamp().');
   }
+}
+
+function emit (instance, type) {
+  instance.element.dispatchEvent(new CustomEvent(type));
 }
