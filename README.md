@@ -49,9 +49,9 @@ directly on the object.
 | Option         | Type    | Default     | Description |
 | -------------- | ------- | ----------- | ----------- |
 | `maxLines`     | Number  | `1`         | The maximum number of lines to allow. Defaults to 1. To set a maximum height instead, use `maxHeight`. |
-| `maxHeight`    | Number  | `undefined` | The maximum height (in pixels) of text in an element. This option is undefined by default. Once set, it takes precedent over `maxLines`. Note that this applies to the height of the text, not the element itself. |
+| `maxHeight`    | Number  | `undefined` | The maximum height (in pixels) of text in an element. This option is undefined by default. Once set, it takes precedence over `maxLines`. Note that this applies to the height of the text, not the element itself. |
 | `useSoftClamp` | Boolean | `false`     | Whether to attempt soft clamping before resorting to hard clamping. |
-| `ellipsis`     | Boolean | `1`         | The minimum font size before a soft clamp turns into a hard clamp. |
+| `ellipsis`     | Boolean | `1`         | The character with which to represent clipped trailing text. This option takes effect when "hard" clamping is used. |
 | `minFontSize`  | Boolean | `1`         | The minimum font size before a soft clamp turns into a hard clamp. |
 | `maxFontSize`  | Boolean | computed font-size | The maximum font size to use for the element when soft clamping. We start with this number and then decrement towards `minFontSize`. |
 
