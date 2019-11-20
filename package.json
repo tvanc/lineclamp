@@ -1,6 +1,6 @@
 {
   "name": "@tvanc/lineclamp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Limit an element's text to a given height or number of lines.",
   "main": "src/LineClamp.js",
   "scripts": {
