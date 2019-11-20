@@ -22,17 +22,17 @@ export default class LineClamp {
    *
    * @param {number} [options.maxLines]
    * The maximum number of lines to allow. Defaults to 1.
-   * To set a maximum height instead, use {@see maxHeight}
+   * To set a maximum height instead, use {@see options.maxHeight}
    *
    * @param {number} [options.maxHeight]
    * The maximum height (in pixels) of text in an element.
    * This option is undefined by default. Once set, it takes precedence over
-   * {@see maxLines}. Note that this applies to the height of the text, not
+   * {@see options.maxLines}. Note that this applies to the height of the text, not
    * the element itself. Restricting the height of the element can be achieved
    * with CSS <code>max-height</code>.
    *
    * @param {boolean} [options.useSoftClamp]
-   * If true, reduce font size (soft clamp) to at least {@see minFontSize}
+   * If true, reduce font size (soft clamp) to at least {@see options.minFontSize}
    * before resorting to trimming text. Defaults to false.
    *
    * @param {string} [options.ellipsis]
@@ -46,7 +46,7 @@ export default class LineClamp {
    * @param {number} [options.maxFontSize]
    * The maximum font size in pixels. We'll start with this font size then
    * reduce until text fits constraints, or font size is equal to
-   * {@see minFontSize}. Defaults to the element's initial computed font size.
+   * {@see options.minFontSize}. Defaults to the element's initial computed font size.
    */
   constructor(element, {
     maxLines = 1,

@@ -6,7 +6,7 @@ of border, padding, line-height, min-height, and max-height.
 
 ## Installation
 ```bash
-npm install --save-dev @tvanc/lineclamp
+npm install @tvanc/lineclamp
 ```
 
 ## Usage
@@ -31,31 +31,56 @@ clamp.unwatch();
 clamp.calculateTextMetrics();
 ```
 
-### Methods and properties
-
-#### Instance methods
+### Methods
 | Method          | Description   |
 | --------------- | ------------- |
 | `watch()`       | Watch for changes. |
 | `unwatch()`     | Stop watching for changes. |
-| `apply()`       | Apply the clamp. Whether `softClamp()` or `hardClamp()` is used depends on the value of the `useSoftClamp` property. |
+| `apply()`       | Apply the clamp. Whether `softClamp()` or `hardClamp()` is used depends on the value of the `useSoftClamp` option. |
 | `softClamp()`   | Reduce font size until text height or line count are within constraints. If font size is reduced to `minFontSize` and text still exceeds constraints, resort to using `hardClamp()`. |
 | `hardClamp()`   | Trim text content to force it to fit within the maximum number of lines. |
 | `shouldClamp()` | Detect whether text exceeds the specified `maxHeight` or `maxLines`. |
-| `calculateTextMetrics()` |  |
+| [`calculateTextMetrics()`](#getting-text-metrics) | Get metrics regarding the element's text, like number of lines, text height, and line height. |
 
-#### Options
-| Property       | Type    | Default     | Description |
+### Options
+These options can be passed as the second argument to the constructor, or set 
+directly on the object.
+
+| Option         | Type    | Default     | Description |
 | -------------- | ------- | ----------- | ----------- |
-| `maxLines`     | Number  | `1`         | The maximum number of lines to allow. Defaults to 1. To set a maximum height instead, use `@see maxHeight`. |
+| `maxLines`     | Number  | `1`         | The maximum number of lines to allow. Defaults to 1. To set a maximum height instead, use `maxHeight`. |
 | `maxHeight`    | Number  | `undefined` | The maximum height (in pixels) of text in an element. This option is undefined by default. Once set, it takes precedent over `maxLines`. Note that this applies to the height of the text, not the element itself. |
 | `useSoftClamp` | Boolean | `false`     | Whether to attempt soft clamping before resorting to hard clamping. |
 | `ellipsis`     | Boolean | `1`         | The minimum font size before a soft clamp turns into a hard clamp. |
 | `minFontSize`  | Boolean | `1`         | The minimum font size before a soft clamp turns into a hard clamp. |
 | `maxFontSize`  | Boolean | computed font-size | The maximum font size to use for the element when soft clamping. We start with this number and then decrement towards `minFontSize`. |
 
-#### Events
-Add listeners for these events to the clamped element.
+### Events
+Add listeners to the clamped element, not the clamp itself.
+
+```javascript
+import LineClamp from '@tvanc/lineclamp';
+const element = document.getElementById('#clampedElement');
+
+const clamp = new LineClamp(element);
+const listener = event => console.log(event.type);
+
+element.addEventListener('lineclamp.softclamp', listener);
+element.addEventListener('lineclamp.hardclamp', listener);
+element.addEventListener('lineclamp.clamp', listener);
+
+// softClamp() emits 'lineclamp.softclamp' and 'lineclamp.clamp', or nothing 
+// if clamping unnecessary
+clamp.softClamp();
+
+// hardClamp() emits 'lineclamp.hardclamp' and 'lineclamp.clamp', or nothing
+// if clamping unnecessary
+clamp.hardClamp();
+
+// apply() can emit 'lineclamp.softclamp' and/or 'lineclamp.hardclamp' followed
+// by 'lineclamp.clamp', or nothing if clamping is unnecessary
+clamp.apply();
+```
  
 | Event                 | Description |
 | --------------------- | ----------- |
@@ -65,21 +90,21 @@ Add listeners for these events to the clamped element.
 
 ### Getting Text Metrics
 Unfortunately, there is no native API for counting the number of lines or
-determining line height. Computed line-height can be "normal". The next-best 
-option is to compare the height of the element with no text to the element's
-height when it has one line of text. That gets you the height of the first line.
-However, subsequent lines can have different heights than the first - though
+determining line height. The computed CSS line-height can return "`normal`", 
+which isn't useful for calculations. The only (mostly) sure-fire solution is to 
+compare the height of the  element with no text to the height of the element 
+with one line with one line of text. That gets you the height of the first line.
+
+Subsequent lines can have different heights than the first - though
 all subsequent lines will be the same height as each other 
 (barring things than can distort line heights, like certain characters). So you 
-have to add an additional line to know the height of the second line.
+have to add an additional line to know the height of the next lines.
 
 This module does all that. The information it gleans is made available via the
 `calculateTextMetrics()` method:
 ```javascript
 import LineClamp from '@tvanc/lineclamp';
 const element = document.getElementById('#long-marketing-title');
-
-// Create a clamp set to one line
 const clamp = new LineClamp(element);
 
 // Get text metrics
@@ -90,8 +115,8 @@ const metrics = clamp.calculateTextMetrics();
 
 | Property | Description |
 | -------- | ----------- |
-| textHeight | The vertical space in pixels required to display the element's current text. |
-| naturalHeightWithOneLine | The height of the element with only one line of text and without minimum or maximum heights. |
-| firstLineHeight | The height that the first line of text adds to the element, i.e., the difference between the height of the element while empty and the height of the element while it contains one line of text. This number may be zero for inline elements because the first line of text does not increase the height of inline elements. |
-| additionalLineHeight | The height that each line of text after the first adds to the element. |
-| lineCount | The number of lines of text the element contains. |
+| `textHeight` | The vertical space in pixels required to display the element's current text. |
+| `naturalHeightWithOneLine` | The height of the element with only one line of text and without minimum or maximum heights. |
+| `firstLineHeight` | The height that the first line of text adds to the element, i.e., the difference between the height of the element while empty and the height of the element while it contains one line of text. This number may be zero for inline elements because the first line of text does not increase the height of inline elements. |
+| `additionalLineHeight` | The height that each line of text after the first adds to the element. |
+| `lineCount` | The number of lines of text the element contains. |
