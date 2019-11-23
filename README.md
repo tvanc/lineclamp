@@ -10,6 +10,9 @@ npm install @tvanc/lineclamp
 ```
 
 ## Usage
+
+View [examples](https://codepen.io/collection/AEwzoQ/) on CodePen.
+
 ```javascript
 import LineClamp from '@tvanc/lineclamp';
 const element = document.getElementById('#long-marketing-title');
@@ -57,7 +60,14 @@ directly on the object.
 
 ### Events
 Add listeners to the clamped element, not the clamp itself.
+ 
+| Event                 | Description |
+| --------------------- | ----------- |
+| `lineclamp.softclamp` | Emitted when the element is softly clamped. |
+| `lineclamp.hardclamp` | Emitted when the element is hard clamped. |
+| `lineclamp.clamp`     | Emitted when any kind of clamping occurs. If `.apply()` results in both soft and hard clamping, only one `lineclamp.clamp` event is issued, after `lineclamp.softclamp` and `lineclamp.hardclamp` have fired. |
 
+#### Example
 ```javascript
 import LineClamp from '@tvanc/lineclamp';
 const element = document.getElementById('#clampedElement');
@@ -81,12 +91,6 @@ clamp.hardClamp();
 // by 'lineclamp.clamp', or nothing if clamping is unnecessary
 clamp.apply();
 ```
- 
-| Event                 | Description |
-| --------------------- | ----------- |
-| `lineclamp.softclamp` | Emitted when the element is softly clamped. |
-| `lineclamp.hardclamp` | Emitted when the element is hard clamped. |
-| `lineclamp.clamp`     | Emitted when any kind of clamping occurs. If `.apply()` results in both soft and hard clamping, only one `lineclamp.clamp` event is issued, after `lineclamp.softclamp` and `lineclamp.hardclamp` have fired. |
 
 ### Getting Text Metrics
 Unfortunately, there is no native API for counting the number of lines or
@@ -97,7 +101,7 @@ with one line with one line of text. That gets you the height of the first line.
 
 Subsequent lines can have different heights than the first - though
 all subsequent lines will be the same height as each other 
-(barring things than can distort line heights, like certain characters). So you 
+(barring things that can distort line heights, like certain characters). So you 
 have to add an additional line to know the height of the next lines.
 
 This module does all that. The information it gleans is made available via the
