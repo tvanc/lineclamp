@@ -96,20 +96,20 @@ export default class LineClamp {
       const originalHtml = element.innerHTML;
       const naturalHeight = element.offsetHeight;
 
-      // Remove all content so we can measure the element's height
-      element.innerHTML = '';
+      // Remove all content so we can measure the element's empty height
+      element.textContent = '';
 
       const naturalHeightWithoutText = element.offsetHeight;
       const textHeight = naturalHeight - naturalHeightWithoutText;
 
       // Fill element with single non-breaking space to find height of one line
-      element.innerHTML = '&nbsp;';
+      element.textContent = '\xa0';
 
       // Get height of element with only one line of text
       const naturalHeightWithOneLine = element.offsetHeight;
       const firstLineHeight = naturalHeightWithOneLine - naturalHeightWithoutText;
 
-      // Add another line
+      // Add another line - use innerHTML
       element.innerHTML += '<br>&nbsp;';
 
       const additionalLineHeight = element.offsetHeight - naturalHeightWithOneLine;
