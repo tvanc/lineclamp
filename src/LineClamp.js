@@ -118,8 +118,10 @@ export default class LineClamp {
     const naturalHeightWithOneLine = clone.offsetHeight;
     const firstLineHeight = naturalHeightWithOneLine - naturalHeightWithoutText;
 
-    // Add another line - use innerHTML
-    element.innerHTML += '<br>&nbsp;';
+    // Add another line: One <br>, then a non-breaking space
+    // appendChild() is faster than innerHTML
+    clone.appendChild(document.createElement('br'));
+    clone.appendChild(document.createTextNode('\xa0'));
 
     const additionalLineHeight = clone.offsetHeight - naturalHeightWithOneLine;
     const lineCount = 1 + (
