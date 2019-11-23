@@ -92,82 +92,8 @@ export default class LineClamp {
    * Layout metrics for the clamped element's text.
    */
   calculateTextMetrics() {
-    return this.whileMeasuring(function calculate (element) {
-      const originalHtml = element.innerHTML;
-      const naturalHeight = element.offsetHeight;
-
-      // Remove all content so we can measure the element's empty height
-      element.textContent = '';
-
-      const naturalHeightWithoutText = element.offsetHeight;
-      const textHeight = naturalHeight - naturalHeightWithoutText;
-
-      // Fill element with single non-breaking space to find height of one line
-      element.textContent = '\xa0';
-
-      // Get height of element with only one line of text
-      const naturalHeightWithOneLine = element.offsetHeight;
-      const firstLineHeight = naturalHeightWithOneLine - naturalHeightWithoutText;
-
-      // Add another line - use innerHTML
-      element.innerHTML += '<br>&nbsp;';
-
-      const additionalLineHeight = element.offsetHeight - naturalHeightWithOneLine;
-      const lineCount = 1 + (
-        (naturalHeight - naturalHeightWithOneLine) / additionalLineHeight
-      );
-
-      // Restore original content
-      element.innerHTML = originalHtml;
-
-      /**
-       * @typedef {Object} TextMetrics
-       *
-       * @property {textHeight}
-       * The vertical space required to display the element's current text.
-       * This is <em>not</em> necessarily the same as the height of the element.
-       * This number may even be greater than the element's height in cases
-       * where the text overflows the element's block axis.
-       *
-       * @property {naturalHeightWithOneLine}
-       * The height of the element with only one line of text and without
-       * minimum or maximum heights. This information may be helpful when
-       * dealing with inline elements (and potentially other scenarios), where
-       * the first line of text does not increase the element's height.
-       *
-       * @property {firstLineHeight}
-       * The height that the first line of text adds to the element, i.e., the
-       * difference between the height of the element while empty and the height
-       * of the element while it contains one line of text. This number may be
-       * zero for inline elements because the first line of text does not
-       * increase the height of inline elements.
-
-       * @property {additionalLineHeight}
-       * The height that each line of text after the first adds to the element.
-       *
-       * @property {lineCount}
-       * The number of lines of text the element contains.
-       */
-      return {
-        textHeight,
-        naturalHeightWithOneLine,
-        firstLineHeight,
-        additionalLineHeight,
-        lineCount,
-      };
-    });
-  }
-
-  /**
-   * Execute a callback while the element is in a state conducive to gathering
-   * text metrics (i.e., minimum and maximum height are unset).
-   *
-   * @param callback
-   * @returns {*}
-   * @private
-   */
-  whileMeasuring(callback) {
     const previouslyWatching = this._watching;
+    const element = this.element;
     const oldStyles = this.element.style.cssText;
     const newStyles = 'min-height:0!important;max-height:none!important';
 
@@ -178,14 +104,46 @@ export default class LineClamp {
     this.element.style.cssText += ';' + newStyles;
 
     // Execute callback while reliable measurements can be made
-    const returnValue = callback(this.element);
+    const originalHtml = element.innerHTML;
+    const naturalHeight = element.offsetHeight;
+
+    // Remove all content so we can measure the element's empty height
+    element.textContent = '';
+
+    const naturalHeightWithoutText = element.offsetHeight;
+    const textHeight = naturalHeight - naturalHeightWithoutText;
+
+    // Fill element with single non-breaking space to find height of one line
+    element.textContent = '\xa0';
+
+    // Get height of element with only one line of text
+    const naturalHeightWithOneLine = element.offsetHeight;
+    const firstLineHeight = naturalHeightWithOneLine - naturalHeightWithoutText;
+
+    // Add another line - use innerHTML
+    element.innerHTML += '<br>&nbsp;';
+
+    const additionalLineHeight = element.offsetHeight - naturalHeightWithOneLine;
+    const lineCount = 1 + (
+      (naturalHeight - naturalHeightWithOneLine) / additionalLineHeight
+    );
+
+    // Restore original content
+    element.innerHTML = originalHtml;
+
     this.element.style.cssText = oldStyles;
 
     if (previouslyWatching) {
       this.watch(false);
     }
 
-    return returnValue;
+    return {
+      textHeight,
+      naturalHeightWithOneLine,
+      firstLineHeight,
+      additionalLineHeight,
+      lineCount,
+    };
   }
 
   /**
