@@ -96,8 +96,6 @@ export default class LineClamp {
     const element = this.element;
     const clone = element.cloneNode(true);
     const style = clone.style;
-    // Unwatch before beginning our own mutations, lest we recurse
-    this.unwatch();
 
     // Append, don't replace
     style.cssText += ';min-height:0!important;max-height:none!important';
@@ -130,10 +128,6 @@ export default class LineClamp {
 
     // Restore original content
     clone.replaceWith(element);
-
-    if (previouslyWatching) {
-      this.watch(false);
-    }
 
     return {
       textHeight,
