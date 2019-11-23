@@ -92,7 +92,6 @@ export default class LineClamp {
    * Layout metrics for the clamped element's text.
    */
   calculateTextMetrics() {
-    const previouslyWatching = this._watching;
     const element = this.element;
     const clone = element.cloneNode(true);
     const style = clone.style;
