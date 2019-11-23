@@ -94,44 +94,40 @@ export default class LineClamp {
   calculateTextMetrics() {
     const previouslyWatching = this._watching;
     const element = this.element;
-    const oldStyles = this.element.style.cssText;
-    const newStyles = 'min-height:0!important;max-height:none!important';
-
+    const clone = element.cloneNode(true);
+    const style = clone.style;
     // Unwatch before beginning our own mutations, lest we recurse
     this.unwatch();
 
     // Append, don't replace
-    this.element.style.cssText += ';' + newStyles;
+    style.cssText += ';min-height:0!important;max-height:none!important';
+    element.replaceWith(clone);
 
-    // Execute callback while reliable measurements can be made
-    const originalHtml = element.innerHTML;
-    const naturalHeight = element.offsetHeight;
+    const naturalHeight = clone.offsetHeight;
 
-    // Remove all content so we can measure the element's empty height
-    element.textContent = '';
+    // Clear to measure empty height. textContent faster than innerHTML
+    clone.textContent = '';
 
-    const naturalHeightWithoutText = element.offsetHeight;
+    const naturalHeightWithoutText = clone.offsetHeight;
     const textHeight = naturalHeight - naturalHeightWithoutText;
 
     // Fill element with single non-breaking space to find height of one line
-    element.textContent = '\xa0';
+    clone.textContent = '\xa0';
 
     // Get height of element with only one line of text
-    const naturalHeightWithOneLine = element.offsetHeight;
+    const naturalHeightWithOneLine = clone.offsetHeight;
     const firstLineHeight = naturalHeightWithOneLine - naturalHeightWithoutText;
 
     // Add another line - use innerHTML
     element.innerHTML += '<br>&nbsp;';
 
-    const additionalLineHeight = element.offsetHeight - naturalHeightWithOneLine;
+    const additionalLineHeight = clone.offsetHeight - naturalHeightWithOneLine;
     const lineCount = 1 + (
       (naturalHeight - naturalHeightWithOneLine) / additionalLineHeight
     );
 
     // Restore original content
-    element.innerHTML = originalHtml;
-
-    this.element.style.cssText = oldStyles;
+    clone.replaceWith(element);
 
     if (previouslyWatching) {
       this.watch(false);
