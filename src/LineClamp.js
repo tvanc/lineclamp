@@ -92,7 +92,7 @@ export default class LineClamp {
    * Layout metrics for the clamped element's text.
    */
   calculateTextMetrics() {
-    return this.whileMeasuring(element => {
+    return this.whileMeasuring(function calculate (element) {
       const originalHtml = element.innerHTML;
       const naturalHeight = element.offsetHeight;
 
