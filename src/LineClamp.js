@@ -128,6 +128,34 @@ export default class LineClamp {
     // Restore original content
     clone.replaceWith(element);
 
+    /**
+     * @typedef {Object} TextMetrics
+     *
+     * @property {textHeight}
+     * The vertical space required to display the element's current text.
+     * This is <em>not</em> necessarily the same as the height of the element.
+     * This number may even be greater than the element's height in cases
+     * where the text overflows the element's block axis.
+     *
+     * @property {naturalHeightWithOneLine}
+     * The height of the element with only one line of text and without
+     * minimum or maximum heights. This information may be helpful when
+     * dealing with inline elements (and potentially other scenarios), where
+     * the first line of text does not increase the element's height.
+     *
+     * @property {firstLineHeight}
+     * The height that the first line of text adds to the element, i.e., the
+     * difference between the height of the element while empty and the height
+     * of the element while it contains one line of text. This number may be
+     * zero for inline elements because the first line of text does not
+     * increase the height of inline elements.
+
+     * @property {additionalLineHeight}
+     * The height that each line of text after the first adds to the element.
+     *
+     * @property {lineCount}
+     * The number of lines of text the element contains.
+     */
     return {
       textHeight,
       naturalHeightWithOneLine,
