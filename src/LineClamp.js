@@ -270,16 +270,31 @@ export default class LineClamp {
    * parameters.
    */
   softClamp() {
-    this.element.style.fontSize = '';
+    const style = this.element.style;
+    style.fontSize = '';
 
     if (this.shouldClamp()) {
       let done = false;
 
-      for (let i = this.maxFontSize; i >= this.minFontSize; --i) {
-        this.element.style.fontSize = `${i}px`;
-        if (!this.shouldClamp()) {
-          done = true;
+      let min = this.minFontSize;
+      let max = this.maxFontSize;
+      let testSize;
 
+      while (max > min) {
+        // Try halfway between min and max
+        testSize = Math.floor((min + max) / 2);
+        style.fontSize = testSize + 'px';
+
+        if (this.shouldClamp()) {
+          max = testSize;
+        } else {
+          min = testSize;
+        }
+
+        // If max is only greater by 1 then min is largest size that still fits
+        if (max - min === 1) {
+          style.fontSize = min + 'px';
+          done = !this.shouldClamp();
           break;
         }
       }
