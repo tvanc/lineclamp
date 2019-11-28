@@ -1,2 +1,4 @@
-coverage
-.idea
+/coverage/
+/.idea/
+/extra/
+/src/

@@ -2,9 +2,10 @@
   "name": "@tvanc/lineclamp",
   "version": "0.1.4",
   "description": "Limit an element's text to a given height or number of lines.",
-  "main": "src/LineClamp.js",
+  "main": "lib/LineClamp.js",
   "scripts": {
-    "test": "browser-sync start -s \"./\" -f \"./test/*\" \"./src/LineClamp.js\" --startPath \"test/test.html\""
+    "test": "browser-sync start -s \"./\" -f \"./test/*\" \"./src/LineClamp.js\" --startPath \"test/test.html\"",
+    "prepublish": "node_modules/.bin/babel src --out-dir lib"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,9 @@
   "license": "ISC",
   "homepage": "https://github.com/tvanc/lineclamp",
   "devDependencies": {
+    "@babel/cli": "^7.7.4",
+    "@babel/core": "^7.7.4",
+    "@babel/preset-env": "^7.7.4",
     "browser-sync": "^2.26.7",
     "chai": "^4.2.0",
     "chai-spies": "^1.0.0",
@@ -34,6 +38,10 @@
     "url": "https://github.com/tvanc/lineclamp/issues"
   },
   "directories": {
-    "test": "test"
+    "test": "test",
+    "lib": "lib"
+  },
+  "babel": {
+    "presets": ["@babel/preset-env"]
   }
 }
