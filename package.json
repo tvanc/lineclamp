@@ -2,9 +2,9 @@
   "name": "@tvanc/lineclamp",
   "version": "0.1.7",
   "description": "Limit an element's text to a given height or number of lines.",
-  "module": "dist/esm.js",
+  "module": "dist/module.js",
   "main": "dist/index.js",
-  "unpkg": "dist/umd.js",
+  "unpkg": "dist/umd.min.js",
   "scripts": {
     "test": "browser-sync start -s \"./\" -f \"./test/*\" \"./src/LineClamp.js\" --startPath \"test/test.html\"",
     "prepublish": "rollup -c"
@@ -32,7 +32,8 @@
     "chai": "^4.2.0",
     "chai-spies": "^1.0.0",
     "mocha": "^5.2.0",
-    "rollup": "^1.27.5"
+    "rollup": "^1.27.5",
+    "rollup-plugin-terser": "^5.1.2"
   },
   "bugs": {
     "url": "https://github.com/tvanc/lineclamp/issues"
