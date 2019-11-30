@@ -2,11 +2,12 @@
   "name": "@tvanc/lineclamp",
   "version": "0.1.6",
   "description": "Limit an element's text to a given height or number of lines.",
-  "main": "dist/LineClamp.js",
-  "type": "module",
+  "module": "dist/esm.js",
+  "main": "dist/index.js",
+  "unpkg": "dist/umd.js",
   "scripts": {
     "test": "browser-sync start -s \"./\" -f \"./test/*\" \"./src/LineClamp.js\" --startPath \"test/test.html\"",
-    "prepublish": "rollup src/LineClamp.js --format umd --name \"Harrison Ford\" --file dist/LineClamp.js"
+    "prepublish": "rollup -c"
   },
   "repository": {
     "type": "git",
@@ -38,6 +39,6 @@
   },
   "directories": {
     "test": "test",
-    "lib": "lib"
+    "lib": "dist"
   }
 }

@@ -9,10 +9,10 @@ of border, padding, line-height, min-height, and max-height.
 npm install @tvanc/lineclamp
 ```
 
-## Usage
-
+## Examples
 View [examples](https://codepen.io/collection/AEwzoQ/) on CodePen.
 
+## Usage
 ```javascript
 import LineClamp from '@tvanc/lineclamp';
 const element = document.getElementById('#long-marketing-title');
