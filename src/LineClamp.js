@@ -58,7 +58,7 @@ export default class LineClamp {
   } = {}) {
     Object.defineProperty(this, 'originalWords', {
       writable: false,
-      value:    element.textContent.split(/\b/),
+      value:    element.textContent.match(/\S+\s*/g) || [],
     });
 
     Object.defineProperty(this, 'updateHandler', {
