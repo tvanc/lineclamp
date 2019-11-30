@@ -4,7 +4,7 @@
   "description": "Limit an element's text to a given height or number of lines.",
   "module": "dist/esm.js",
   "main": "dist/index.js",
-  "unpkg": "dist/umd.min.js",
+  "unpkg": "dist/esm.min.js",
   "scripts": {
     "test": "browser-sync start -s \"./\" -f \"./test/*\" \"./src/LineClamp.js\" --startPath \"test/test.html\"",
     "prepublish": "rollup -c"
