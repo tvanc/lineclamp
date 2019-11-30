@@ -58,7 +58,7 @@ export default class LineClamp {
   } = {}) {
     Object.defineProperty(this, 'originalWords', {
       writable: false,
-      value:    element.textContent.split(/\s+/),
+      value:    element.textContent.split(/\b/),
     });
 
     Object.defineProperty(this, 'updateHandler', {
@@ -212,6 +212,8 @@ export default class LineClamp {
       // Ignore internally started mutations, lest we recurse into oblivion
       this.unwatch();
 
+      this.element.textContent = this.originalWords.join('');
+
       if (this.useSoftClamp) {
         this.softClamp();
       }
@@ -235,21 +237,24 @@ export default class LineClamp {
    * @see {LineClamp.maxLines}
    * @see {LineClamp.maxHeight}
    */
-  hardClamp() {
-    if (this.shouldClamp()) {
+  hardClamp(doCheck = true) {
+    if (doCheck || this.shouldClamp()) {
+      // Start as small as possible
       for (let i = 0, len = this.originalWords.length; i < len; ++i) {
-        let currentText = this.originalWords.slice(0, i)
-          .join(' ');
+        let currentText = this.originalWords.slice(0, i).join('');
 
         this.element.textContent = currentText;
 
+        // Stop when text gets too big
         if (this.shouldClamp()) {
+          // Remove characters until we don't need to clamp anymore
           do {
             currentText = currentText.slice(0, -1);
-            this.element.innerHTML = currentText + this.ellipsis;
+            this.element.textContent = currentText + this.ellipsis;
           }
           while (this.shouldClamp());
 
+          console.log('Elected text:\n', currentText)
           break;
         }
       }
@@ -258,8 +263,6 @@ export default class LineClamp {
       emit(this, 'lineclamp.hardclamp');
       emit(this, 'lineclamp.clamp');
     }
-
-    this.element.style.removeProperty('min-height');
 
     return this;
   }
@@ -284,8 +287,9 @@ export default class LineClamp {
         // Try halfway between min and max
         testSize = Math.floor((min + max) / 2);
         style.fontSize = testSize + 'px';
+        const shouldClamp = this.shouldClamp();
 
-        if (this.shouldClamp()) {
+        if (shouldClamp) {
           max = testSize;
         } else {
           min = testSize;
@@ -293,8 +297,10 @@ export default class LineClamp {
 
         // If max is only greater by 1 then min is largest size that still fits
         if (max - min === 1) {
-          style.fontSize = min + 'px';
-          done = !this.shouldClamp();
+          if (min !== testSize) {
+            style.fontSize = min + 'px';
+          }
+          done = !shouldClamp;
           break;
         }
       }
@@ -304,7 +310,7 @@ export default class LineClamp {
 
       // Don't emit `lineclamp.clamp` event twice.
       if (!done) {
-        this.hardClamp();
+        this.hardClamp(false);
       }
       else {
         // hardClamp emits `lineclamp.clamp` too. Only emit from here if we're

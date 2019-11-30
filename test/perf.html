@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link
-        type="text/css"
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css"
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
     <style>
         html, body {
             height: 100%;
@@ -17,14 +16,15 @@
             background: wheat;
         }
 
-        #clampedElement {
+        #haiku {
+            box-sizing: border-box;
+            max-width: 100%;
             font-family: 'Dancing Script', cursive;
             margin: 0;
             white-space: pre-wrap;
             font-size: 33.33vh;
             /* line-height could be anything but I like 1 */
             line-height: 1;
-            text-align: justify;
             padding: 0 0.25em;
         }
 
@@ -39,29 +39,27 @@
         }
     </style>
     <script type="module">
-        import LineClamp from '../src/LineClamp.js';
+      import LineClamp from '../src/LineClamp.js'
 
-        const el = document.querySelector('#clampedElement');
-        const clamp = new LineClamp(el, {
-            maxLines:     3,
-            useSoftClamp: true,
-        });
+      const el = document.querySelector('#haiku')
+      const clamp = new LineClamp(el, {
+        maxLines: 3,
+        useSoftClamp: true,
+      })
 
-        const btn = document.querySelector('#recalcBtn');
-
-        window.addEventListener('resize', () => {clamp.apply()});
-
-        btn.addEventListener('click', () => {
-            clamp.apply();
-        });
+      const recalcBtn = document.querySelector('#recalcBtn')
+      recalcBtn.addEventListener(
+        'click',
+        () => clamp.apply().watch()
+      )
     </script>
 </head>
 <body>
-<p id="clampedElement">Resize. As large as possible,
-I am always three lines:
+<p id="haiku">As large as possible
+I am always three lines
 An awful haiku</p>
-<button
-    id="recalcBtn"
-    style="position:absolute;right:0;top:0;bottom:0;border:none">Recalc</button>
+<button id="recalcBtn"
+        style="position:fixed;right:0;top:0;bottom:0;border:none">Recalc
+</button>
 </body>
-</0html>
+</html>
