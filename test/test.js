@@ -69,6 +69,7 @@ describe('LineClamp', () => {
   it('Soft clamp hardens if necessary.', () => {
     const element = document.getElementById('softClampTester');
     const clamp = new LineClamp(element, {
+      maxLines: 1,
       minFontSize:  48,
       useSoftClamp: true,
       strict:       true
@@ -85,7 +86,10 @@ describe('LineClamp', () => {
 
   it('Events trigger properly', () => {
     const element = document.getElementById('eventsTester');
-    const clamp = new LineClamp(element, {useSoftClamp: true});
+    const clamp = new LineClamp(element, {
+      useSoftClamp: true,
+      maxLines: 1,
+    });
 
     // Guarantee softClamp() will escalate to hardClamp()
     clamp.minFontSize = clamp.maxFontSize;
@@ -120,7 +124,7 @@ describe('LineClamp', () => {
 
   it('Reclamps on DOM mutation', done => {
     const element = document.getElementById('mutationTester');
-    const clamp = new LineClamp(element, {minFontSize: 48});
+    const clamp = new LineClamp(element, {minFontSize: 48, maxLines: 1});
     const clampSpy = chai.spy.on(clamp, 'apply');
 
     clamp.watch();
@@ -140,7 +144,7 @@ describe('LineClamp', () => {
 
   it('Padding, border, min-height, and font-size are taken into account', () => {
     const element = document.getElementById('dimensionsTester');
-    const clamp = new LineClamp(element);
+    const clamp = new LineClamp(element, { maxLines: 1 });
 
     clamp.apply();
 

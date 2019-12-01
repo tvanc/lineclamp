@@ -49,7 +49,7 @@ export default class LineClamp {
    * {@see options.minFontSize}. Defaults to the element's initial computed font size.
    */
   constructor(element, {
-    maxLines = 1,
+    maxLines = undefined,
     maxHeight = undefined,
     useSoftClamp = false,
     minFontSize = 1,
@@ -237,8 +237,8 @@ export default class LineClamp {
    * @see {LineClamp.maxLines}
    * @see {LineClamp.maxHeight}
    */
-  hardClamp(doCheck = true) {
-    if (doCheck || this.shouldClamp()) {
+  hardClamp(skipCheck = true) {
+    if (skipCheck || this.shouldClamp()) {
       // Start as small as possible
       for (let i = 0, len = this.originalWords.length; i < len; ++i) {
         let currentText = this.originalWords.slice(0, i).join('');
@@ -331,6 +331,10 @@ export default class LineClamp {
    */
   shouldClamp() {
     const { lineCount, textHeight } = this.calculateTextMetrics();
+
+    if (undefined !== this.maxHeight && undefined !== this.maxLines) {
+      return textHeight > this.maxHeight || lineCount > this.maxLines
+    }
 
     if (undefined !== this.maxHeight) {
       return textHeight > this.maxHeight;
