@@ -1,3 +1,5 @@
 /.idea/
 /extra/
 /src/
+/rollup.config.js
+/.editorconfig
