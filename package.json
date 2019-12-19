@@ -33,7 +33,7 @@
     "chai-spies": "^1.0.0",
     "mocha": "^5.2.0",
     "rollup": "^1.27.5",
-    "rollup-plugin-terser": "^5.1.2"
+    "rollup-plugin-terser": "^5.1.3"
   },
   "bugs": {
     "url": "https://github.com/tvanc/lineclamp/issues"
