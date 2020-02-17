@@ -1,64 +1,68 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>LineClamp Tests</title>
-    <link rel="stylesheet" href="/node_modules/mocha/mocha.css">
-    <link rel="stylesheet" href="/test/test.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-</head>
-<body>
+    <head>
+        <title>LineClamp Tests</title>
+        <link rel="stylesheet" href="/node_modules/mocha/mocha.css" />
+        <link rel="stylesheet" href="/test/test.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    </head>
+    <body>
+        <div id="mocha"></div>
 
-<div id="mocha"></div>
+        <div id="examples" style="font-family: Arial, sans-serif">
+            <h1 id="strictTester" class="tester">
+                Just plain one line.
+            </h1>
 
-<div id="examples" style="font-family: Arial, sans-serif">
-    <h1 id="strictTester" class="tester">
-        Just plain one line.
-    </h1>
+            <h1 id="heightTester" class="tester">
+                One line in original font size.
+            </h1>
 
-    <h1 id="heightTester" class="tester">
-        One line in original font size.
-    </h1>
+            <h1 id="hardClampTester" class="tester">
+                One line hard clamped.
+            </h1>
 
-    <h1 id="hardClampTester" class="tester">
-        One line hard clamped.
-    </h1>
+            <h1 id="softClampTester" class="tester">
+                Soft clamp hardens when needed.
+            </h1>
 
-    <h1 id="softClampTester" class="tester">
-        Soft clamp hardens when needed.
-    </h1>
+            <h1 id="eventsTester" class="tester">
+                Events trigger properly.
+            </h1>
 
-    <h1 id="eventsTester" class="tester">
-        Events trigger properly.
-    </h1>
+            <h1 id="mutationTester" class="tester">
+                Observer observes
+            </h1>
 
-    <h1 id="mutationTester" class="tester">
-        Observer observes
-    </h1>
+            <h1
+                id="dimensionsTester"
+                class="tester"
+                style="padding-top:10px;border-bottom:10px solid black;font-size:64px;min-height:60px"
+            >
+                Padding, border, and min-height accounted for
+            </h1>
 
-    <h1
-        id="dimensionsTester" class="tester"
-        style="padding-top:10px;border-bottom:10px solid black;font-size:64px;min-height:60px"
-    >
-        Padding, border, and min-height accounted for
-    </h1>
+            <h1 class="tester" style="font-size:35px">
+                "<span
+                    id="displayInlineTester"
+                    style="background:rgba(255,200,200,0.8)"
+                    >Here are three lines of text. In an inline element!</span
+                >" &ndash; Abraham Lincoln
+            </h1>
+        </div>
 
-    <h1 class="tester" style="font-size:35px">
-        "<span id="displayInlineTester" style="background:rgba(255,200,200,0.8)">Here are three lines of text. In an inline element!</span>"
-        &ndash; Abraham Lincoln
-    </h1>
-</div>
-
-<script src="/node_modules/mocha/mocha.js"></script>
-<script src="/node_modules/chai/chai.js"></script>
-<script src="/node_modules/chai-spies/chai-spies.js"></script>
-<script>mocha.setup('bdd')</script>
-<script src="/test/test.js" type="module"></script>
-<script type="module">
-    mocha
-        .setup({globals: ['___browserSync___']})
-        .checkLeaks()
-        .run();
-</script>
-
-</body>
+        <script src="/node_modules/mocha/mocha.js"></script>
+        <script src="/node_modules/chai/chai.js"></script>
+        <script src="/node_modules/chai-spies/chai-spies.js"></script>
+        <script>
+            mocha.setup("bdd")
+        </script>
+        <script src="/test/test.js" type="module"></script>
+        <script type="module">
+            mocha
+                .setup({ globals: ["___browserSync___"] })
+                .checkLeaks()
+                .run()
+        </script>
+    </body>
 </html>

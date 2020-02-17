@@ -1,65 +1,71 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link type="text/css"
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
-    <style>
-        html, body {
-            height: 100%;
-        }
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link
+            type="text/css"
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
+        />
+        <style>
+            html,
+            body {
+                height: 100%;
+            }
 
-        body {
-            display: flex;
-            align-items: center;
-            background: wheat;
-        }
+            body {
+                display: flex;
+                align-items: center;
+                background: wheat;
+            }
 
-        #haiku {
-            box-sizing: border-box;
-            max-width: 100%;
-            font-family: 'Dancing Script', cursive;
-            margin: 0;
-            white-space: pre-wrap;
-            font-size: 33.33vh;
-            /* line-height could be anything but I like 1 */
-            line-height: 1;
-            padding: 0 0.25em;
-        }
+            #haiku {
+                box-sizing: border-box;
+                max-width: 100%;
+                font-family: "Dancing Script", cursive;
+                margin: 0;
+                white-space: pre-wrap;
+                font-size: 33.33vh;
+                /* line-height could be anything but I like 1 */
+                line-height: 1;
+                padding: 0 0.25em;
+            }
 
-        /* latin */
-        @font-face {
-            font-family: 'Dancing Script';
-            font-style: normal;
-            font-weight: 400;
-            font-display: swap;
-            src: url(https://fonts.gstatic.com/s/dancingscript/v13/If2cXTr6YS-zF4S-kcSWSVi_sxjsohD9F50Ruu7BMSo3Sup6hNX6plRP.woff) format('woff');
-            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-        }
-    </style>
-    <script type="module">
-      import LineClamp from '../src/LineClamp.js'
+            /* latin */
+            @font-face {
+                font-family: "Dancing Script";
+                font-style: normal;
+                font-weight: 400;
+                font-display: swap;
+                src: url(https://fonts.gstatic.com/s/dancingscript/v13/If2cXTr6YS-zF4S-kcSWSVi_sxjsohD9F50Ruu7BMSo3Sup6hNX6plRP.woff)
+                    format("woff");
+                unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC,
+                    U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
+                    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+            }
+        </style>
+        <script type="module">
+            import LineClamp from "../src/LineClamp.js"
 
-      const el = document.querySelector('#haiku')
-      const clamp = new LineClamp(el, {
-        maxLines: 3,
-        useSoftClamp: true,
-      })
+            const el = document.querySelector("#haiku")
+            const clamp = new LineClamp(el, {
+                maxLines: 3,
+                useSoftClamp: true
+            })
 
-      const recalcBtn = document.querySelector('#recalcBtn')
-      recalcBtn.addEventListener(
-        'click',
-        () => clamp.apply().watch()
-      )
-    </script>
-</head>
-<body>
-<p id="haiku">As large as possible
-I am always three lines
-An awful haiku</p>
-<button id="recalcBtn"
-        style="position:fixed;right:0;top:0;bottom:0;border:none">Apply
-</button>
-</body>
+            const recalcBtn = document.querySelector("#recalcBtn")
+            recalcBtn.addEventListener("click", () => clamp.apply().watch())
+        </script>
+    </head>
+    <body>
+        <p id="haiku">
+            As large as possible I am always three lines An awful haiku
+        </p>
+        <button
+            id="recalcBtn"
+            style="position:fixed;right:0;top:0;bottom:0;border:none"
+        >
+            Apply
+        </button>
+    </body>
 </html>

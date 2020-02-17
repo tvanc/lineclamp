@@ -1,172 +1,169 @@
-import LineClamp from '/src/LineClamp.js';
+import LineClamp from "/src/LineClamp.js"
 
-const {expect, assert} = chai;
+const { expect, assert } = chai
 
-describe('LineClamp', () => {
-  it('Limits to one line in reduced font size', () => {
-    const element = document.getElementById('strictTester');
+describe("LineClamp", () => {
+  it("Limits to one line in reduced font size", () => {
+    const element = document.getElementById("strictTester")
     const clamp = new LineClamp(element, {
       maxLines: 1,
-      strict:   true,
-    });
+      strict: true
+    })
 
-    clamp.apply();
+    clamp.apply()
 
     assert.equal(
       clamp.calculateTextMetrics().firstLineHeight,
       element.clientHeight,
-      'Element reduced to one strict line.'
-    );
-  });
+      "Element reduced to one strict line."
+    )
+  })
 
-  it('Limits to height of one line in original font size.', () => {
-    const element = document.getElementById('heightTester');
-    const clamp = new LineClamp(element, {useSoftClamp: true});
-    const startingLineHeight = clamp.calculateTextMetrics().firstLineHeight;
-    clamp.maxHeight = startingLineHeight;
+  it("Limits to height of one line in original font size.", () => {
+    const element = document.getElementById("heightTester")
+    const clamp = new LineClamp(element, { useSoftClamp: true })
+    const startingLineHeight = clamp.calculateTextMetrics().firstLineHeight
+    clamp.maxHeight = startingLineHeight
 
-    clamp.apply();
+    clamp.apply()
 
-    const currentLineHeight = clamp.calculateTextMetrics().firstLineHeight;
-    const currentHeight = element.clientHeight;
+    const currentLineHeight = clamp.calculateTextMetrics().firstLineHeight
+    const currentHeight = element.clientHeight
 
     assert.isAbove(
       currentHeight,
       currentLineHeight,
-      'Element is taller than one line in its reduced font size.'
-    );
+      "Element is taller than one line in its reduced font size."
+    )
 
     assert.strictEqual(
       currentHeight / currentLineHeight,
       2,
-      'Element height is twice current line height (two lines)'
-    );
+      "Element height is twice current line height (two lines)"
+    )
 
     assert.isAtMost(
       currentHeight,
       startingLineHeight,
-      'Current height equal to or less than starting height'
-    );
-  });
+      "Current height equal to or less than starting height"
+    )
+  })
 
-  it('Hard clamps to one line.', () => {
-    const element = document.getElementById('hardClampTester');
+  it("Hard clamps to one line.", () => {
+    const element = document.getElementById("hardClampTester")
     const clamp = new LineClamp(element, {
-      maxLines:     1,
-      useSoftClamp: false,
-    });
+      maxLines: 1,
+      useSoftClamp: false
+    })
 
-    clamp.apply();
+    clamp.apply()
 
-    const {firstLineHeight} = clamp.calculateTextMetrics();
+    const { firstLineHeight } = clamp.calculateTextMetrics()
 
     assert.isTrue(
       element.clientHeight === firstLineHeight,
-      'Element is only one line high'
-    );
-  });
+      "Element is only one line high"
+    )
+  })
 
-  it('Soft clamp hardens if necessary.', () => {
-    const element = document.getElementById('softClampTester');
+  it("Soft clamp hardens if necessary.", () => {
+    const element = document.getElementById("softClampTester")
     const clamp = new LineClamp(element, {
       maxLines: 1,
-      minFontSize:  48,
+      minFontSize: 48,
       useSoftClamp: true,
-      strict:       true
-    });
+      strict: true
+    })
 
-    const softClampSpy = chai.spy.on(clamp, 'softClamp');
-    const hardClampSpy = chai.spy.on(clamp, 'hardClamp');
+    const softClampSpy = chai.spy.on(clamp, "softClamp")
+    const hardClampSpy = chai.spy.on(clamp, "hardClamp")
 
-    clamp.apply();
+    clamp.apply()
 
-    expect(softClampSpy).to.have.been.called();
-    expect(hardClampSpy).to.have.been.called();
-  });
+    expect(softClampSpy).to.have.been.called()
+    expect(hardClampSpy).to.have.been.called()
+  })
 
-  it('Events trigger properly', () => {
-    const element = document.getElementById('eventsTester');
+  it("Events trigger properly", () => {
+    const element = document.getElementById("eventsTester")
     const clamp = new LineClamp(element, {
       useSoftClamp: true,
-      maxLines: 1,
-    });
+      maxLines: 1
+    })
 
     // Guarantee softClamp() will escalate to hardClamp()
-    clamp.minFontSize = clamp.maxFontSize;
+    clamp.minFontSize = clamp.maxFontSize
 
-    let softClampTriggeredFirst = false;
-    let hardClampTriggeredNext = false;
-    let plainClampTriggeredLast = false;
+    let softClampTriggeredFirst = false
+    let hardClampTriggeredNext = false
+    let plainClampTriggeredLast = false
 
     element.addEventListener(
-      'lineclamp.softclamp',
+      "lineclamp.softclamp",
       // Ensure correct order
-      () => softClampTriggeredFirst = !hardClampTriggeredNext
-    );
+      () => (softClampTriggeredFirst = !hardClampTriggeredNext)
+    )
 
     element.addEventListener(
-      'lineclamp.hardclamp',
+      "lineclamp.hardclamp",
       // Ensure correct order
-      () => hardClampTriggeredNext = softClampTriggeredFirst
-    );
+      () => (hardClampTriggeredNext = softClampTriggeredFirst)
+    )
 
     element.addEventListener(
-      'lineclamp.clamp',
-      () => plainClampTriggeredLast = hardClampTriggeredNext
-    );
+      "lineclamp.clamp",
+      () => (plainClampTriggeredLast = hardClampTriggeredNext)
+    )
 
-    clamp.apply();
+    clamp.apply()
 
-    assert(softClampTriggeredFirst, 'Soft clamp triggered first');
-    assert(hardClampTriggeredNext, 'Hard clamp triggered next');
-    assert(plainClampTriggeredLast, 'Plain clamp triggered last');
-  });
+    assert(softClampTriggeredFirst, "Soft clamp triggered first")
+    assert(hardClampTriggeredNext, "Hard clamp triggered next")
+    assert(plainClampTriggeredLast, "Plain clamp triggered last")
+  })
 
-  it('Reclamps on DOM mutation', done => {
-    const element = document.getElementById('mutationTester');
-    const clamp = new LineClamp(element, {minFontSize: 48, maxLines: 1});
-    const clampSpy = chai.spy.on(clamp, 'apply');
+  it("Reclamps on DOM mutation", done => {
+    const element = document.getElementById("mutationTester")
+    const clamp = new LineClamp(element, { minFontSize: 48, maxLines: 1 })
+    const clampSpy = chai.spy.on(clamp, "apply")
 
-    clamp.watch();
+    clamp.watch()
 
-    expect(clampSpy).not.to.have.been.called();
+    expect(clampSpy).not.to.have.been.called()
 
-    element.addEventListener(
-      'lineclamp.hardclamp',
-      () => {
-        expect(clampSpy).to.have.been.called();
-        done();
-      }
-    );
+    element.addEventListener("lineclamp.hardclamp", () => {
+      expect(clampSpy).to.have.been.called()
+      done()
+    })
 
-    element.innerHTML = element.innerHTML + ' ';
-  });
+    element.innerHTML = element.innerHTML + " "
+  })
 
-  it('Padding, border, min-height, and font-size are taken into account', () => {
-    const element = document.getElementById('dimensionsTester');
-    const clamp = new LineClamp(element, { maxLines: 1 });
+  it("Padding, border, min-height, and font-size are taken into account", () => {
+    const element = document.getElementById("dimensionsTester")
+    const clamp = new LineClamp(element, { maxLines: 1 })
 
-    clamp.apply();
+    clamp.apply()
 
-    const {firstLineHeight} = clamp.calculateTextMetrics();
-    const currentHeight = element.offsetHeight;
+    const { firstLineHeight } = clamp.calculateTextMetrics()
+    const currentHeight = element.offsetHeight
 
     assert.isAbove(
       currentHeight,
       firstLineHeight,
-      'Element is taller than the line height.'
-    );
-  });
+      "Element is taller than the line height."
+    )
+  })
 
-  it('Works for inline text', () => {
+  it("Works for inline text", () => {
     // We have to just take this for granted. There's no other way to get the
     // number of lines to test against.
-    const expectedLineCount = 3;
-    const element = document.getElementById('displayInlineTester');
-    const clamp = new LineClamp(element, {maxLines: expectedLineCount});
-    const {lineCount} = clamp.calculateTextMetrics();
+    const expectedLineCount = 3
+    const element = document.getElementById("displayInlineTester")
+    const clamp = new LineClamp(element, { maxLines: expectedLineCount })
+    const { lineCount } = clamp.calculateTextMetrics()
 
     // How do I prove there are three lines algorithmically?
-    assert.equal(lineCount, expectedLineCount, 'Inline text is correct height.');
-  });
-});
+    assert.equal(lineCount, expectedLineCount, "Inline text is correct height.")
+  })
+})
