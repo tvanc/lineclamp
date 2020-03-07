@@ -276,46 +276,44 @@ export default class LineClamp {
     const style = this.element.style
     style.fontSize = ""
 
-    if (this.shouldClamp()) {
-      let done = false
+    let done = false
 
-      let min = this.minFontSize
-      let max = this.maxFontSize
-      let testSize
+    let min = this.minFontSize
+    let max = this.maxFontSize
+    let testSize
 
-      while (max > min) {
-        // Try halfway between min and max
-        testSize = Math.floor((min + max) / 2)
-        style.fontSize = testSize + "px"
-        const shouldClamp = this.shouldClamp()
+    while (max > min) {
+      // Try halfway between min and max
+      testSize = Math.floor((min + max) / 2)
+      style.fontSize = testSize + "px"
+      const shouldClamp = this.shouldClamp()
 
-        if (shouldClamp) {
-          max = testSize
-        } else {
-          min = testSize
-        }
-
-        // If max is only greater by 1 then min is largest size that still fits
-        if (max - min === 1) {
-          if (min !== testSize) {
-            style.fontSize = min + "px"
-          }
-          done = !shouldClamp
-          break
-        }
-      }
-
-      // Emit specific softClamp event first
-      emit(this, "lineclamp.softclamp")
-
-      // Don't emit `lineclamp.clamp` event twice.
-      if (!done) {
-        this.hardClamp(false)
+      if (shouldClamp) {
+        max = testSize
       } else {
-        // hardClamp emits `lineclamp.clamp` too. Only emit from here if we're
-        // not also hard clamping.
-        emit(this, "lineclamp.clamp")
+        min = testSize
       }
+
+      // If max is only greater by 1 then min is largest size that still fits
+      if (max - min === 1) {
+        if (min !== testSize) {
+          style.fontSize = min + "px"
+        }
+        done = !shouldClamp
+        break
+      }
+    }
+
+    // Emit specific softClamp event first
+    emit(this, "lineclamp.softclamp")
+
+    // Don't emit `lineclamp.clamp` event twice.
+    if (!done) {
+      this.hardClamp(false)
+    } else {
+      // hardClamp emits `lineclamp.clamp` too. Only emit from here if we're
+      // not also hard clamping.
+      emit(this, "lineclamp.clamp")
     }
 
     return this
