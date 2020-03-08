@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" charset="utf8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <head>
+        <title>Hammer Fall</title>
+
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            html,
+            body {
+                height: 100%;
+            }
+
+            body {
+                margin: 0;
+                background: wheat;
+                font-family: sans-serif;
+            }
+
+            #grid {
+                height: 100%;
+                display: grid;
+                margin: 0;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                grid-template-rows: repeat(3, minmax(0, 1fr));
+                text-align: center;
+                align-items: center;
+            }
+
+            [data-clamp] {
+                line-height: 1;
+                font-size: 100vh;
+                text-align: justify;
+                word-break: break-word;
+                cursor: pointer;
+            }
+
+            /* FF otherwise reports empty element's computed font-size instead of zero, the element's actual height */
+            [data-clamp]:empty {
+                display: none;
+            }
+        </style>
+
+        <script type="module">
+            import LineClamp from "//unpkg.com/@tvanc/lineclamp/dist/esm.js"
+
+            const haiku = document.querySelector("#grid")
+            const spans = haiku.querySelectorAll("[data-clamp]")
+            const clamps = []
+
+            for (const span of spans) {
+                clamps.push(
+                    new LineClamp(span, {
+                        useSoftClamp: true,
+                        maxLines: 1
+                    })
+                )
+            }
+
+            window.addEventListener("resize", setMaxHeight)
+            setMaxHeight()
+
+            function setMaxHeight() {
+                for (const clamp of clamps) {
+                    clamp.maxHeight = innerHeight / 3
+                    clamp.apply()
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <article id="grid">
+            <!-- Text inspired by the book Lucifer's Hammer -->
+            <div>
+                <span data-clamp>Ice</span>
+            </div>
+            <div>
+                <span data-clamp>Cream</span>
+            </div>
+            <div>
+                <span data-clamp>Sundae</span>
+            </div>
+            <div>
+                <span data-clamp>Coming</span>
+            </div>
+            <div>
+                <span data-clamp>This</span>
+            </div>
+            <div>
+                <span data-clamp>Tuesday</span>
+            </div>
+            <div>
+                <span data-clamp>☄️</span>
+            </div>
+            <div>
+                <span data-clamp>💥</span>
+            </div>
+            <div>
+                <span data-clamp>🌋</span>
+            </div>
+        </article>
+    </body>
+</html>

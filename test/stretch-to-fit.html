@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <style>
+            body {
+                margin: 0;
+                height: 100vh;
+                display: grid;
+                align-items: center;
+            }
+
+            h1 {
+                max-width: 100vw;
+                word-break: break-word;
+                margin: 0;
+                font-size: 20vw;
+            }
+        </style>
+        <script type="module">
+            import LineClamp from "/src/LineClamp.js"
+
+            window.addEventListener("DOMContentLoaded", function() {
+                const options = {
+                    useSoftClamp: true,
+                    maxFontSize: 1000,
+                    minFontSize: 0,
+                    maxLines: 1
+                }
+
+                const titleClamp = new LineClamp(
+                    document.querySelector("h1"),
+                    options
+                )
+
+                titleClamp.apply().watch()
+            })
+        </script>
+    </head>
+    <body>
+        <h1>Cool!</h1>
+    </body>
+</html>

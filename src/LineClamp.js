@@ -280,28 +280,36 @@ export default class LineClamp {
 
     let min = this.minFontSize
     let max = this.maxFontSize
-    let testSize
+    let testSize = max
 
     while (max > min) {
-      // Try halfway between min and max
-      testSize = Math.floor((min + max) / 2)
       style.fontSize = testSize + "px"
-      const shouldClamp = this.shouldClamp()
+      let shouldClamp = this.shouldClamp()
 
       if (shouldClamp) {
         max = testSize
+        console.log("Max", max)
       } else {
         min = testSize
+        console.log("Min", min)
       }
 
       // If max is only greater by 1 then min is largest size that still fits
       if (max - min === 1) {
         if (min !== testSize) {
           style.fontSize = min + "px"
+          shouldClamp = this.shouldClamp()
         }
         done = !shouldClamp
+
+        if (!done) {
+          console.log("Not done, passing to hardClamp")
+        }
         break
       }
+
+      // Try halfway between min and max
+      testSize = Math.floor((min + max) / 2)
     }
 
     // Emit specific softClamp event first

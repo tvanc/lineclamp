@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Slanty Blend Mode</title>
+        <style>
+            :root {
+                --color-1: white;
+                --color-2: black;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                position: relative;
+                background: var(--color-2);
+                height: 100vh;
+            }
+
+            .slant {
+                position: absolute;
+                left: 0;
+                height: 100vh;
+                width: 100%;
+                clip-path: polygon(0 0, 50% 100%, 100% 0%);
+                background: var(--color-1);
+            }
+
+            main {
+                width: 100%;
+                padding: 1rem 3rem;
+                mix-blend-mode: screen;
+                color: var(--color-1);
+                position: relative;
+                z-index: 10;
+                mix-blend-mode: difference;
+                margin: 0;
+            }
+
+            h1 {
+                margin: 0;
+                font-size: 10rem;
+                word-break: break-word;
+            }
+
+            h2 {
+                margin-bottom: 0;
+                font-size: 5rem;
+            }
+        </style>
+    </head>
+    <body>
+        <aside class="slant"></aside>
+        <main>
+            <h1>Travis Van Couvering</h1>
+
+            <h2>The ideal human.</h2>
+        </main>
+    </body>
+    <script type="module">
+        import LineClamp from "/src/LineClamp.js"
+        const titleClamp = new LineClamp(document.querySelector("h1"), {
+            useSoftClamp: true,
+            maxFontSize: 200,
+            maxLines: 1
+        })
+
+        const subtitleClamp = new LineClamp(document.querySelector("h2"), {
+            useSoftClamp: true,
+            maxFontSize: 200,
+            maxLines: 1
+        })
+
+        titleClamp.apply().watch()
+        subtitleClamp.apply().watch()
+    </script>
+</html>
