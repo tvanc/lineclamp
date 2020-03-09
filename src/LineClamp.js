@@ -35,6 +35,11 @@ export default class LineClamp {
    * If true, reduce font size (soft clamp) to at least {@see options.minFontSize}
    * before resorting to trimming text. Defaults to false.
    *
+   * @param {boolean} [options.hardClampAsFallback]
+   * If true, resort to hard clamping if soft clamping reaches the minimum font size
+   * and still doesn't fit within the max height or number of lines.
+   * Defaults to true.
+   *
    * @param {string} [options.ellipsis]
    * The character with which to represent clipped trailing text.
    * This option takes effect when "hard" clamping is used.
@@ -54,6 +59,7 @@ export default class LineClamp {
       maxLines = undefined,
       maxHeight = undefined,
       useSoftClamp = false,
+      hardClampAsFallback = true,
       minFontSize = 1,
       maxFontSize = undefined,
       ellipsis = "…"
@@ -82,6 +88,7 @@ export default class LineClamp {
     this.maxLines = maxLines
     this.maxHeight = maxHeight
     this.useSoftClamp = useSoftClamp
+    this.hardClampAsFallback = hardClampAsFallback
     this.minFontSize = minFontSize
     this.maxFontSize = maxFontSize
     this.ellipsis = ellipsis
@@ -294,7 +301,7 @@ export default class LineClamp {
 
       // If max is only greater by 1 then min is largest size that still fits
       if (max - min === 1) {
-        if (min !== testSize) {
+        if (min < testSize) {
           style.fontSize = min + "px"
           shouldClamp = this.shouldClamp()
         }
@@ -310,7 +317,7 @@ export default class LineClamp {
     emit(this, "lineclamp.softclamp")
 
     // Don't emit `lineclamp.clamp` event twice.
-    if (!done) {
+    if (!done && this.hardClampAsFallback) {
       this.hardClamp(false)
     } else {
       // hardClamp emits `lineclamp.clamp` too. Only emit from here if we're

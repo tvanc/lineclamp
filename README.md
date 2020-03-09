@@ -39,29 +39,30 @@ clamp.calculateTextMetrics()
 
 ### Methods
 
-| Method                                            | Description                                                                                                                                                                          |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `watch()`                                         | Watch for changes.                                                                                                                                                                   |
-| `unwatch()`                                       | Stop watching for changes.                                                                                                                                                           |
-| `apply()`                                         | Apply the clamp. Whether `softClamp()` or `hardClamp()` is used depends on the value of the `useSoftClamp` option.                                                                   |
-| `softClamp()`                                     | Reduce font size until text height or line count are within constraints. If font size is reduced to `minFontSize` and text still exceeds constraints, resort to using `hardClamp()`. |
-| `hardClamp()`                                     | Trim text content to force it to fit within the maximum number of lines.                                                                                                             |
-| `shouldClamp()`                                   | Detect whether text exceeds the specified `maxHeight` or `maxLines`.                                                                                                                 |
-| [`calculateTextMetrics()`](#getting-text-metrics) | Get metrics regarding the element's text, like number of lines, text height, and line height.                                                                                        |
+| Method                                            | Description                                                                                                                                                                                     |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `watch()`                                         | Watch for changes.                                                                                                                                                                              |
+| `unwatch()`                                       | Stop watching for changes.                                                                                                                                                                      |
+| `apply()`                                         | Apply the clamp. Whether `softClamp()` or `hardClamp()` is used depends on the value of the `useSoftClamp` option.                                                                              |
+| `softClamp()`                                     | Reduce font size until text height or line count are within constraints. If font size is reduced to `minFontSize` and text still exceeds constraints, optionally resort to using `hardClamp()`. |
+| `hardClamp()`                                     | Trim text content to force it to fit within the maximum number of lines.                                                                                                                        |
+| `shouldClamp()`                                   | Detect whether text exceeds the specified `maxHeight` or `maxLines`.                                                                                                                            |
+| [`calculateTextMetrics()`](#getting-text-metrics) | Get metrics regarding the element's text, like number of lines, text height, and line height.                                                                                                   |
 
 ### Options
 
 These options can be passed as the second argument to the constructor, or set
 directly on the object.
 
-| Option         | Type    | Default            | Description                                                                                                                                                                                                         |
-| -------------- | ------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `maxLines`     | Number  | `1`                | The maximum number of lines to allow. Defaults to 1. To set a maximum height instead, use `maxHeight`.                                                                                                              |
-| `maxHeight`    | Number  | `undefined`        | The maximum height (in pixels) of text in an element. This option is undefined by default. Once set, it takes precedence over `maxLines`. Note that this applies to the height of the text, not the element itself. |
-| `useSoftClamp` | Boolean | `false`            | Whether to attempt soft clamping before resorting to hard clamping.                                                                                                                                                 |
-| `ellipsis`     | Boolean | `1`                | The character with which to represent clipped trailing text. This option takes effect when "hard" clamping is used.                                                                                                 |
-| `minFontSize`  | Boolean | `1`                | The minimum font size before a soft clamp turns into a hard clamp.                                                                                                                                                  |
-| `maxFontSize`  | Boolean | computed font-size | The maximum font size to use for the element when soft clamping. We start with this number and then decrement towards `minFontSize`.                                                                                |
+| Option                | Type    | Default            | Description                                                                                                                                                                                                         |
+| --------------------- | ------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `maxLines`            | Number  | `1`                | The maximum number of lines to allow. Defaults to 1. To set a maximum height instead, use `maxHeight`.                                                                                                              |
+| `maxHeight`           | Number  | `undefined`        | The maximum height (in pixels) of text in an element. This option is undefined by default. Once set, it takes precedence over `maxLines`. Note that this applies to the height of the text, not the element itself. |
+| `useSoftClamp`        | Boolean | `false`            | Whether to attempt soft clamping before resorting to hard clamping.                                                                                                                                                 |
+| `hardClampAsFallback` | Boolean | `true`             | If true, resort to hard clamping if soft clamping reaches the minimum font size and still doesn't fit within the max height or number of lines                                                                      |
+| `ellipsis`            | Boolean | `1`                | The character with which to represent clipped trailing text. This option takes effect when "hard" clamping is used.                                                                                                 |
+| `minFontSize`         | Boolean | `1`                | The minimum font size before a soft clamp turns into a hard clamp.                                                                                                                                                  |
+| `maxFontSize`         | Boolean | computed font-size | The maximum font size to use for the element when soft clamping. We start with this number and then decrement towards `minFontSize`.                                                                                |
 
 ### Events
 
