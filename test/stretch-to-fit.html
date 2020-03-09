@@ -3,40 +3,39 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Document</title>
+        <title>Stretch to Fit | LineClamp</title>
         <style>
             body {
                 margin: 0;
                 height: 100vh;
                 display: grid;
                 align-items: center;
+                overflow: hidden;
             }
 
             h1 {
                 max-width: 100vw;
                 word-break: break-word;
                 margin: 0;
-                font-size: 20vw;
+                font-size: 1000px;
             }
         </style>
         <script type="module">
             import LineClamp from "/src/LineClamp.js"
 
-            window.addEventListener("DOMContentLoaded", function() {
-                const options = {
-                    useSoftClamp: true,
-                    maxFontSize: 1000,
-                    minFontSize: 0,
-                    maxLines: 1
-                }
+            const options = {
+                useSoftClamp: true,
+                useHardClamp: false,
+                maxFontSize: 1000,
+                maxLines: 1
+            }
 
-                const titleClamp = new LineClamp(
-                    document.querySelector("h1"),
-                    options
-                )
+            window.titleClamp = new LineClamp(
+                document.querySelector("h1"),
+                options
+            )
 
-                titleClamp.apply().watch()
-            })
+            titleClamp.apply().watch()
         </script>
     </head>
     <body>
