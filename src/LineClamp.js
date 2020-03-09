@@ -288,10 +288,8 @@ export default class LineClamp {
 
       if (shouldClamp) {
         max = testSize
-        console.log("Max", max)
       } else {
         min = testSize
-        console.log("Min", min)
       }
 
       // If max is only greater by 1 then min is largest size that still fits
@@ -301,10 +299,6 @@ export default class LineClamp {
           shouldClamp = this.shouldClamp()
         }
         done = !shouldClamp
-
-        if (!done) {
-          console.log("Not done, passing to hardClamp")
-        }
         break
       }
 
