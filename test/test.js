@@ -19,7 +19,7 @@ describe("LineClamp", () => {
     )
   })
 
-  it("Limits to height of one line in original font size.", () => {
+  it("Limits to height of one line in original font size", () => {
     const element = document.getElementById("heightTester")
     const clamp = new LineClamp(element, { useSoftClamp: true })
     const startingLineHeight = clamp.calculateTextMetrics().firstLineHeight
@@ -49,7 +49,7 @@ describe("LineClamp", () => {
     )
   })
 
-  it("Hard clamps to one line.", () => {
+  it("Hard clamps to one line", () => {
     const element = document.getElementById("hardClampTester")
     const clamp = new LineClamp(element, {
       maxLines: 1,
@@ -66,7 +66,7 @@ describe("LineClamp", () => {
     )
   })
 
-  it("Soft clamp hardens if necessary.", () => {
+  it("Soft clamp hardens if necessary", () => {
     const element = document.getElementById("softClampTester")
     const clamp = new LineClamp(element, {
       maxLines: 1,
@@ -167,7 +167,8 @@ describe("LineClamp", () => {
     assert.equal(lineCount, expectedLineCount, "Inline text is correct height.")
   })
 
-  it("Event fires only when triggered", () => {
+  // TODO Clean this mess up
+  it("Events trigger only when clamping occurs", () => {
     const hcEl = document.getElementById("hardClampOnlyFiresIfTriggeredTester")
     const scEl = document.getElementById("softClampOnlyFiresIfTriggeredTester")
 
