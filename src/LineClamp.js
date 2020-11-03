@@ -247,6 +247,8 @@ export default class LineClamp {
    */
   hardClamp(skipCheck = true) {
     if (skipCheck || this.shouldClamp()) {
+      let clamped = false
+
       // Start as small as possible
       for (let i = 1, len = this.originalWords.length; i <= len; ++i) {
         let currentText = this.originalWords.slice(0, i).join("")
@@ -261,13 +263,16 @@ export default class LineClamp {
             this.element.textContent = currentText + this.ellipsis
           } while (this.shouldClamp())
 
+          clamped = true
           break
         }
       }
 
-      // Broadcast more specific hardClamp event first
-      emit(this, "lineclamp.hardclamp")
-      emit(this, "lineclamp.clamp")
+      if (clamped) {
+        // Broadcast more specific hardClamp event first
+        emit(this, "lineclamp.hardclamp")
+        emit(this, "lineclamp.clamp")
+      }
     }
 
     return this
