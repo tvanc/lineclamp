@@ -248,7 +248,7 @@ export default class LineClamp {
   hardClamp(skipCheck = true) {
     if (skipCheck || this.shouldClamp()) {
       // Start as small as possible
-      for (let i = 1, len = this.originalWords.length; i < len; ++i) {
+      for (let i = 1, len = this.originalWords.length; i <= len; ++i) {
         let currentText = this.originalWords.slice(0, i).join("")
 
         this.element.textContent = currentText
