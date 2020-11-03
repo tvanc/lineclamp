@@ -285,6 +285,7 @@ export default class LineClamp {
    */
   softClamp() {
     const style = this.element.style
+    const startSize = window.getComputedStyle(this.element).fontSize
     style.fontSize = ""
 
     let done = false
@@ -317,13 +318,17 @@ export default class LineClamp {
       testSize = Math.floor((min + max) / 2)
     }
 
+    const changed = style.fontSize !== startSize
+
     // Emit specific softClamp event first
-    emit(this, "lineclamp.softclamp")
+    if (changed) {
+      emit(this, "lineclamp.softclamp")
+    }
 
     // Don't emit `lineclamp.clamp` event twice.
     if (!done && this.hardClampAsFallback) {
       this.hardClamp(false)
-    } else {
+    } else if (changed) {
       // hardClamp emits `lineclamp.clamp` too. Only emit from here if we're
       // not also hard clamping.
       emit(this, "lineclamp.clamp")
