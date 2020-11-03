@@ -166,4 +166,38 @@ describe("LineClamp", () => {
     // How do I prove there are three lines algorithmically?
     assert.equal(lineCount, expectedLineCount, "Inline text is correct height.")
   })
+
+  it("Event fires only when triggered", () => {
+    const hcEl = document.getElementById("hardClampOnlyFiresIfTriggeredTester")
+    const scEl = document.getElementById("softClampOnlyFiresIfTriggeredTester")
+
+    const softClamp = new LineClamp(scEl, { maxLines: 1, useSoftClamp: true })
+    const hardClamp = new LineClamp(hcEl, { maxLines: 1, useSoftClamp: false })
+
+    const softClampListener = () => console.log("softclamp: Soft clamped!")
+    const hardClampListener = () => console.log("hardclamp: Hard clamped!")
+
+    const softClampGenericListener = () => console.log("softclamp: clamped!")
+    const hardClampGenericListener = () => console.log("hardclamp: clamped!")
+
+    const softClampListenerSpy = chai.spy(softClampListener)
+    const hardClampListenerSpy = chai.spy(hardClampListener)
+    const softClampGenericListenerSpy = chai.spy(softClampGenericListener)
+    const hardClampGenericListenerSpy = chai.spy(hardClampGenericListener)
+
+    scEl.addEventListener("lineclamp.softclamp", softClampListenerSpy)
+    scEl.addEventListener("lineclamp.clamp", softClampGenericListenerSpy)
+
+    hcEl.addEventListener("lineclamp.hardclamp", hardClampListenerSpy)
+    hcEl.addEventListener("lineclamp.clamp", hardClampGenericListenerSpy)
+
+    softClamp.apply()
+    hardClamp.apply()
+
+    expect(softClampListenerSpy).not.to.have.been.called()
+    expect(softClampGenericListenerSpy).not.to.have.been.called()
+
+    expect(hardClampListenerSpy).not.to.have.been.called()
+    expect(hardClampGenericListenerSpy).not.to.have.been.called()
+  })
 })
