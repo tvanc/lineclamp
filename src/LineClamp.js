@@ -62,22 +62,22 @@ export default class LineClamp {
       hardClampAsFallback = true,
       minFontSize = 1,
       maxFontSize = undefined,
-      ellipsis = "…"
+      ellipsis = "…",
     } = {}
   ) {
     Object.defineProperty(this, "originalWords", {
       writable: false,
-      value: element.textContent.match(/\S+\s*/g) || []
+      value: element.textContent.match(/\S+\s*/g) || [],
     })
 
     Object.defineProperty(this, "updateHandler", {
       writable: false,
-      value: () => this.apply()
+      value: () => this.apply(),
     })
 
     Object.defineProperty(this, "observer", {
       writable: false,
-      value: new MutationObserver(this.updateHandler)
+      value: new MutationObserver(this.updateHandler),
     })
 
     if (undefined === maxFontSize) {
@@ -169,7 +169,7 @@ export default class LineClamp {
       naturalHeightWithOneLine,
       firstLineHeight,
       additionalLineHeight,
-      lineCount
+      lineCount,
     }
   }
 
@@ -187,7 +187,7 @@ export default class LineClamp {
         characterData: true,
         subtree: true,
         childList: true,
-        attributes: true
+        attributes: true,
       })
 
       this._watching = true
