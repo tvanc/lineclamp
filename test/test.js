@@ -7,7 +7,7 @@ describe("LineClamp", () => {
     const element = document.getElementById("strictTester")
     const clamp = new LineClamp(element, {
       maxLines: 1,
-      strict: true
+      strict: true,
     })
 
     clamp.apply()
@@ -53,7 +53,7 @@ describe("LineClamp", () => {
     const element = document.getElementById("hardClampTester")
     const clamp = new LineClamp(element, {
       maxLines: 1,
-      useSoftClamp: false
+      useSoftClamp: false,
     })
 
     clamp.apply()
@@ -72,7 +72,7 @@ describe("LineClamp", () => {
       maxLines: 1,
       minFontSize: 48,
       useSoftClamp: true,
-      strict: true
+      strict: true,
     })
 
     const softClampSpy = chai.spy.on(clamp, "softClamp")
@@ -88,7 +88,7 @@ describe("LineClamp", () => {
     const element = document.getElementById("eventsTester")
     const clamp = new LineClamp(element, {
       useSoftClamp: true,
-      maxLines: 1
+      maxLines: 1,
     })
 
     // Guarantee softClamp() will escalate to hardClamp()
@@ -122,7 +122,7 @@ describe("LineClamp", () => {
     assert(plainClampTriggeredLast, "Plain clamp triggered last")
   })
 
-  it("Reclamps on DOM mutation", done => {
+  it("Reclamps on DOM mutation", (done) => {
     const element = document.getElementById("mutationTester")
     const clamp = new LineClamp(element, { minFontSize: 48, maxLines: 1 })
     const clampSpy = chai.spy.on(clamp, "apply")
