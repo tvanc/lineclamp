@@ -261,7 +261,6 @@ export default class LineClamp {
             this.element.textContent = currentText + this.ellipsis
           } while (this.shouldClamp())
 
-          console.log("Elected text:\n", currentText)
           break
         }
       }
