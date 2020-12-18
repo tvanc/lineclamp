@@ -279,6 +279,52 @@ export default class LineClamp {
   }
 
   /**
+   * @see {LineClamp.maxLines}
+   * @see {LineClamp.maxHeight}
+   */
+  hardClampBinarySearch(skipCheck = true) {
+    if (skipCheck || this.shouldClamp()) {
+      let clamped = false
+
+      let min = 1
+      let max = this.originalWords.length - 1
+      let cursor = min
+
+      while (max > min) {
+        let currentText = this.originalWords.slice(0, cursor).join(" ")
+
+        this.element.textContent = currentText
+
+        if (this.shouldClamp()) {
+          max = cursor
+        } else {
+          min = cursor
+        }
+
+        if (max - min === 1) {
+          do {
+            currentText = currentText.slice(0, -1)
+            this.element.textContent = currentText + this.ellipsis
+          } while (this.shouldClamp())
+
+          clamped = true
+          break
+        }
+
+        cursor = Math.floor((min + max) / 2)
+      }
+
+      if (clamped) {
+        // Broadcast more specific hardClamp event first
+        emit(this, "lineclamp.hardclamp")
+        emit(this, "lineclamp.clamp")
+      }
+    }
+
+    return this
+  }
+
+  /**
    * Reduces font size until text fits within the specified height or number of
    * lines. Resorts to using {@see hardClamp()} if text still exceeds clamp
    * parameters.
