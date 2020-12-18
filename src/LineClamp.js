@@ -315,9 +315,6 @@ export default class LineClamp {
         cursor = Math.floor((min + max) / 2)
       }
 
-      // console.log("======================================")
-      console.log(`hardClampLogN() took ${i} iterations`)
-
       if (clamped) {
         // Broadcast more specific hardClamp event first
         emit(this, "lineclamp.hardclamp")
