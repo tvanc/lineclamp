@@ -264,6 +264,7 @@ export default class LineClamp {
           } while (this.shouldClamp())
 
           clamped = true
+          console.log(`hardClamp() took ${i} iterations`)
           break
         }
       }
@@ -313,6 +314,9 @@ export default class LineClamp {
 
         cursor = Math.floor((min + max) / 2)
       }
+
+      // console.log("======================================")
+      console.log(`hardClampLogN() took ${i} iterations`)
 
       if (clamped) {
         // Broadcast more specific hardClamp event first
