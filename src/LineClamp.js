@@ -307,15 +307,11 @@ export default class LineClamp {
             this.element.textContent = currentText + this.ellipsis
           } while (this.shouldClamp())
 
-          clamped = true
+          // Broadcast more specific hardClamp event first
+          emit(this, "lineclamp.hardclamp")
+          emit(this, "lineclamp.clamp")
         }
       )
-
-      if (clamped) {
-        // Broadcast more specific hardClamp event first
-        emit(this, "lineclamp.hardclamp")
-        emit(this, "lineclamp.clamp")
-      }
     }
 
     return this
