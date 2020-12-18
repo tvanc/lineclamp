@@ -286,34 +286,27 @@ export default class LineClamp {
   hardClampBinarySearch(skipCheck = true) {
     if (skipCheck || this.shouldClamp()) {
       let clamped = false
+      let currentText
 
-      let min = 1
-      let max = this.originalWords.length - 1
-      let cursor = min
+      binarySearch(
+        1,
+        this.originalWords.length - 1,
+        1,
+        (val) => {
+          currentText = this.originalWords.slice(0, val).join(" ")
+          this.element.textContent = currentText
 
-      while (max > min) {
-        let currentText = this.originalWords.slice(0, cursor).join(" ")
-
-        this.element.textContent = currentText
-
-        if (this.shouldClamp()) {
-          max = cursor
-        } else {
-          min = cursor
-        }
-
-        if (max - min === 1) {
+          return this.shouldClamp()
+        },
+        () => {
           do {
             currentText = currentText.slice(0, -1)
             this.element.textContent = currentText + this.ellipsis
           } while (this.shouldClamp())
 
           clamped = true
-          break
         }
-
-        cursor = Math.floor((min + max) / 2)
-      }
+      )
 
       if (clamped) {
         // Broadcast more specific hardClamp event first
