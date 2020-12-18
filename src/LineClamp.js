@@ -385,6 +385,56 @@ export default class LineClamp {
   }
 
   /**
+   * Reduces font size until text fits within the specified height or number of
+   * lines. Resorts to using {@see hardClamp()} if text still exceeds clamp
+   * parameters.
+   */
+  softClampBinarySearch() {
+    const style = this.element.style
+    const startSize = window.getComputedStyle(this.element).fontSize
+    style.fontSize = ""
+
+    let done = false
+    let shouldClamp
+
+    binarySearch(
+      this.minFontSize,
+      this.maxFontSize,
+      this.maxFontSize,
+      (val) => {
+        style.fontSize = val + "px"
+        shouldClamp = this.shouldClamp()
+        return shouldClamp
+      },
+      (val, min) => {
+        if (min < val) {
+          style.fontSize = min + "px"
+          shouldClamp = this.shouldClamp()
+        }
+        done = !shouldClamp
+      }
+    )
+
+    const changed = style.fontSize !== startSize
+
+    // Emit specific softClamp event first
+    if (changed) {
+      emit(this, "lineclamp.softclamp")
+    }
+
+    // Don't emit `lineclamp.clamp` event twice.
+    if (!done && this.hardClampAsFallback) {
+      this.hardClamp(false)
+    } else if (changed) {
+      // hardClamp emits `lineclamp.clamp` too. Only emit from here if we're
+      // not also hard clamping.
+      emit(this, "lineclamp.clamp")
+    }
+
+    return this
+  }
+
+  /**
    * @returns {boolean}
    * Whether height of text or number of lines exceed constraints.
    *
