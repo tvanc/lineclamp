@@ -412,6 +412,23 @@ export default class LineClamp {
   }
 }
 
+function binarySearch(min, max, cursor, test, done) {
+  while (max > min) {
+    if (test(cursor, min, max)) {
+      max = cursor
+    } else {
+      min = cursor
+    }
+
+    if (max - min === 1) {
+      done(cursor, min, max)
+      break
+    }
+
+    cursor = Math.floor((min + max) / 2)
+  }
+}
+
 function emit(instance, type) {
   instance.element.dispatchEvent(new CustomEvent(type))
 }
