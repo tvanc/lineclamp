@@ -285,7 +285,6 @@ export default class LineClamp {
    */
   hardClampBinarySearch(skipCheck = true) {
     if (skipCheck || this.shouldClamp()) {
-      let clamped = false
       let currentText
 
       binarySearch(
@@ -298,7 +297,11 @@ export default class LineClamp {
 
           return this.shouldClamp()
         },
-        () => {
+        (val) => {
+          // Add one more word
+          currentText = this.originalWords.slice(0, val + 1).join(" ")
+
+          // Then trim letters until it fits
           do {
             currentText = currentText.slice(0, -1)
             this.element.textContent = currentText + this.ellipsis
