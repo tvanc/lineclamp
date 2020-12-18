@@ -247,44 +247,6 @@ export default class LineClamp {
    */
   hardClamp(skipCheck = true) {
     if (skipCheck || this.shouldClamp()) {
-      let clamped = false
-
-      // Start as small as possible
-      for (let i = 1, len = this.originalWords.length; i <= len; ++i) {
-        let currentText = this.originalWords.slice(0, i).join("")
-
-        this.element.textContent = currentText
-
-        // Stop when text gets too big
-        if (this.shouldClamp()) {
-          // Remove characters until we don't need to clamp anymore
-          do {
-            currentText = currentText.slice(0, -1)
-            this.element.textContent = currentText + this.ellipsis
-          } while (this.shouldClamp())
-
-          clamped = true
-          console.log(`hardClamp() took ${i} iterations`)
-          break
-        }
-      }
-
-      if (clamped) {
-        // Broadcast more specific hardClamp event first
-        emit(this, "lineclamp.hardclamp")
-        emit(this, "lineclamp.clamp")
-      }
-    }
-
-    return this
-  }
-
-  /**
-   * @see {LineClamp.maxLines}
-   * @see {LineClamp.maxHeight}
-   */
-  hardClampBinarySearch(skipCheck = true) {
-    if (skipCheck || this.shouldClamp()) {
       let currentText
 
       binarySearch(
@@ -323,65 +285,6 @@ export default class LineClamp {
    * parameters.
    */
   softClamp() {
-    const style = this.element.style
-    const startSize = window.getComputedStyle(this.element).fontSize
-    style.fontSize = ""
-
-    let done = false
-
-    let min = this.minFontSize
-    let max = this.maxFontSize
-    let testSize = max
-
-    while (max > min) {
-      style.fontSize = testSize + "px"
-      let shouldClamp = this.shouldClamp()
-
-      if (shouldClamp) {
-        max = testSize
-      } else {
-        min = testSize
-      }
-
-      // If max is only greater by 1 then min is largest size that still fits
-      if (max - min === 1) {
-        if (min < testSize) {
-          style.fontSize = min + "px"
-          shouldClamp = this.shouldClamp()
-        }
-        done = !shouldClamp
-        break
-      }
-
-      // Try halfway between min and max
-      testSize = Math.floor((min + max) / 2)
-    }
-
-    const changed = style.fontSize !== startSize
-
-    // Emit specific softClamp event first
-    if (changed) {
-      emit(this, "lineclamp.softclamp")
-    }
-
-    // Don't emit `lineclamp.clamp` event twice.
-    if (!done && this.hardClampAsFallback) {
-      this.hardClamp(false)
-    } else if (changed) {
-      // hardClamp emits `lineclamp.clamp` too. Only emit from here if we're
-      // not also hard clamping.
-      emit(this, "lineclamp.clamp")
-    }
-
-    return this
-  }
-
-  /**
-   * Reduces font size until text fits within the specified height or number of
-   * lines. Resorts to using {@see hardClamp()} if text still exceeds clamp
-   * parameters.
-   */
-  softClampBinarySearch() {
     const style = this.element.style
     const startSize = window.getComputedStyle(this.element).fontSize
     style.fontSize = ""
