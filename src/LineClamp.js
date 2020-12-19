@@ -251,7 +251,7 @@ export default class LineClamp {
 
       binarySearch(
         1,
-        this.originalWords.length - 1,
+        this.originalWords.length,
         1,
         (val) => {
           currentText = this.originalWords.slice(0, val).join(" ")
