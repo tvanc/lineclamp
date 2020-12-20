@@ -249,19 +249,20 @@ export default class LineClamp {
     if (skipCheck || this.shouldClamp()) {
       let currentText
 
-      binarySearch(
+      findBoundary(
         1,
         this.originalWords.length,
-        1,
         (val) => {
           currentText = this.originalWords.slice(0, val).join(" ")
           this.element.textContent = currentText
 
           return this.shouldClamp()
         },
-        (val) => {
-          // Add one more word
-          currentText = this.originalWords.slice(0, val + 1).join(" ")
+        (val, min, max) => {
+          // Add one more word if not on max
+          if (val > min) {
+            currentText = this.originalWords.slice(0, max).join(" ")
+          }
 
           // Then trim letters until it fits
           do {
@@ -292,9 +293,8 @@ export default class LineClamp {
     let done = false
     let shouldClamp
 
-    binarySearch(
+    findBoundary(
       this.minFontSize,
-      this.maxFontSize,
       this.maxFontSize,
       (val) => {
         style.fontSize = val + "px"
@@ -302,7 +302,7 @@ export default class LineClamp {
         return shouldClamp
       },
       (val, min) => {
-        if (min < val) {
+        if (val > min) {
           style.fontSize = min + "px"
           shouldClamp = this.shouldClamp()
         }
@@ -357,9 +357,34 @@ export default class LineClamp {
   }
 }
 
-function binarySearch(min, max, cursor, test, done) {
+/**
+ * Performs a binary search for the point in a contigous range where a given
+ * test callback will go from returning true to returning false.
+ *
+ * Since this uses a binary-search algorithm this is an O(log n) function,
+ * where n = max - min.
+ *
+ * @param {Number} min
+ * The lower boundary of the range.
+ *
+ * @param {Number} max
+ * The upper boundary of the range.
+ *
+ * @param test
+ * A callback that receives the current value in the range and returns a truthy or falsy value.
+ *
+ * @param done
+ * A function to perform when complete. Receives the following parameters
+ * - cursor
+ * - maxPassingValue
+ * - minFailingValue
+ */
+function findBoundary(min, max, test, done) {
+  // start halfway through the range
+  let cursor = (min + max) / 2
+
   while (max > min) {
-    if (test(cursor, min, max)) {
+    if (test(cursor)) {
       max = cursor
     } else {
       min = cursor
