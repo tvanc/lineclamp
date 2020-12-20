@@ -247,32 +247,34 @@ export default class LineClamp {
    */
   hardClamp(skipCheck = true) {
     if (skipCheck || this.shouldClamp()) {
-      let clamped = false
+      let currentText
 
-      // Start as small as possible
-      for (let i = 1, len = this.originalWords.length; i <= len; ++i) {
-        let currentText = this.originalWords.slice(0, i).join("")
+      findBoundary(
+        1,
+        this.originalWords.length,
+        (val) => {
+          currentText = this.originalWords.slice(0, val).join(" ")
+          this.element.textContent = currentText
 
-        this.element.textContent = currentText
+          return this.shouldClamp()
+        },
+        (val, min, max) => {
+          // Add one more word if not on max
+          if (val > min) {
+            currentText = this.originalWords.slice(0, max).join(" ")
+          }
 
-        // Stop when text gets too big
-        if (this.shouldClamp()) {
-          // Remove characters until we don't need to clamp anymore
+          // Then trim letters until it fits
           do {
             currentText = currentText.slice(0, -1)
             this.element.textContent = currentText + this.ellipsis
           } while (this.shouldClamp())
 
-          clamped = true
-          break
+          // Broadcast more specific hardClamp event first
+          emit(this, "lineclamp.hardclamp")
+          emit(this, "lineclamp.clamp")
         }
-      }
-
-      if (clamped) {
-        // Broadcast more specific hardClamp event first
-        emit(this, "lineclamp.hardclamp")
-        emit(this, "lineclamp.clamp")
-      }
+      )
     }
 
     return this
@@ -289,34 +291,24 @@ export default class LineClamp {
     style.fontSize = ""
 
     let done = false
+    let shouldClamp
 
-    let min = this.minFontSize
-    let max = this.maxFontSize
-    let testSize = max
-
-    while (max > min) {
-      style.fontSize = testSize + "px"
-      let shouldClamp = this.shouldClamp()
-
-      if (shouldClamp) {
-        max = testSize
-      } else {
-        min = testSize
-      }
-
-      // If max is only greater by 1 then min is largest size that still fits
-      if (max - min === 1) {
-        if (min < testSize) {
+    findBoundary(
+      this.minFontSize,
+      this.maxFontSize,
+      (val) => {
+        style.fontSize = val + "px"
+        shouldClamp = this.shouldClamp()
+        return shouldClamp
+      },
+      (val, min) => {
+        if (val > min) {
           style.fontSize = min + "px"
           shouldClamp = this.shouldClamp()
         }
         done = !shouldClamp
-        break
       }
-
-      // Try halfway between min and max
-      testSize = Math.floor((min + max) / 2)
-    }
+    )
 
     const changed = style.fontSize !== startSize
 
@@ -362,6 +354,48 @@ export default class LineClamp {
     throw new Error(
       "maxLines or maxHeight must be set before calling shouldClamp()."
     )
+  }
+}
+
+/**
+ * Performs a binary search for the point in a contigous range where a given
+ * test callback will go from returning true to returning false.
+ *
+ * Since this uses a binary-search algorithm this is an O(log n) function,
+ * where n = max - min.
+ *
+ * @param {Number} min
+ * The lower boundary of the range.
+ *
+ * @param {Number} max
+ * The upper boundary of the range.
+ *
+ * @param test
+ * A callback that receives the current value in the range and returns a truthy or falsy value.
+ *
+ * @param done
+ * A function to perform when complete. Receives the following parameters
+ * - cursor
+ * - maxPassingValue
+ * - minFailingValue
+ */
+function findBoundary(min, max, test, done) {
+  // start halfway through the range
+  let cursor = (min + max) / 2
+
+  while (max > min) {
+    if (test(cursor)) {
+      max = cursor
+    } else {
+      min = cursor
+    }
+
+    if (max - min === 1) {
+      done(cursor, min, max)
+      break
+    }
+
+    cursor = Math.floor((min + max) / 2)
   }
 }
 
