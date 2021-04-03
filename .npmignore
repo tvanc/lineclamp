@@ -4,3 +4,4 @@
 /rollup.config.js
 /.editorconfig
 /test/
+/.prettierrc
