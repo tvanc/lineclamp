@@ -169,8 +169,8 @@ describe("LineClamp", () => {
 
   // TODO Clean this mess up
   it("Events trigger only when clamping occurs", () => {
-    const hcEl = document.getElementById("hardClampOnlyFiresIfTriggeredTester")
     const scEl = document.getElementById("softClampOnlyFiresIfTriggeredTester")
+    const hcEl = document.getElementById("hardClampOnlyFiresIfTriggeredTester")
 
     const softClamp = new LineClamp(scEl, { maxLines: 1, useSoftClamp: true })
     const hardClamp = new LineClamp(hcEl, { maxLines: 1, useSoftClamp: false })
