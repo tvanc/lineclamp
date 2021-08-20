@@ -178,13 +178,13 @@ describe("LineClamp", () => {
     const softClampListener = () => console.log("softclamp: Soft clamped!")
     const hardClampListener = () => console.log("hardclamp: Hard clamped!")
 
-    const softClampGenericListener = () => console.log("softclamp: clamped!")
-    const hardClampGenericListener = () => console.log("hardclamp: clamped!")
+    const scElGenericListener = () => console.log("softclamp: clamped!")
+    const hcElGenericListener = () => console.log("hardclamp: clamped!")
 
     const softClampListenerSpy = chai.spy(softClampListener)
     const hardClampListenerSpy = chai.spy(hardClampListener)
-    const softClampGenericListenerSpy = chai.spy(softClampGenericListener)
-    const hardClampGenericListenerSpy = chai.spy(hardClampGenericListener)
+    const softClampGenericListenerSpy = chai.spy(scElGenericListener)
+    const hardClampGenericListenerSpy = chai.spy(hcElGenericListener)
 
     scEl.addEventListener("lineclamp.softclamp", softClampListenerSpy)
     scEl.addEventListener("lineclamp.clamp", softClampGenericListenerSpy)
