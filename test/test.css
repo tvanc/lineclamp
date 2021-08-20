@@ -12,11 +12,16 @@
 }
 
 .tester {
+    display: none;
     width: 300px;
     background: lightgreen;
     font-size: 72px;
     line-height: 1;
     margin: 15px auto;
+}
+
+.tester.active {
+    display: block;
 }
 
 .tester:last-child {

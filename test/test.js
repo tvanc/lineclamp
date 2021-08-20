@@ -4,7 +4,7 @@ const { expect, assert } = chai
 
 describe("LineClamp", () => {
   it("Limits to one line in reduced font size", () => {
-    const element = document.getElementById("strictTester")
+    const element = getAndShowById("strictTester")
     const clamp = new LineClamp(element, {
       maxLines: 1,
       strict: true,
@@ -20,7 +20,7 @@ describe("LineClamp", () => {
   })
 
   it("Limits to height of one line in original font size", () => {
-    const element = document.getElementById("heightTester")
+    const element = getAndShowById("heightTester")
     const clamp = new LineClamp(element, { useSoftClamp: true })
     const startingLineHeight = clamp.calculateTextMetrics().firstLineHeight
     clamp.maxHeight = startingLineHeight
@@ -50,7 +50,7 @@ describe("LineClamp", () => {
   })
 
   it("Hard clamps to one line", () => {
-    const element = document.getElementById("hardClampTester")
+    const element = getAndShowById("hardClampTester")
     const clamp = new LineClamp(element, {
       maxLines: 1,
       useSoftClamp: false,
@@ -67,7 +67,7 @@ describe("LineClamp", () => {
   })
 
   it("Soft clamp hardens if necessary", () => {
-    const element = document.getElementById("softClampTester")
+    const element = getAndShowById("softClampTester")
     const clamp = new LineClamp(element, {
       maxLines: 1,
       minFontSize: 48,
@@ -85,7 +85,7 @@ describe("LineClamp", () => {
   })
 
   it("Events trigger properly", () => {
-    const element = document.getElementById("eventsTester")
+    const element = getAndShowById("eventsTester")
     const clamp = new LineClamp(element, {
       useSoftClamp: true,
       maxLines: 1,
@@ -123,7 +123,7 @@ describe("LineClamp", () => {
   })
 
   it("Reclamps on DOM mutation", (done) => {
-    const element = document.getElementById("mutationTester")
+    const element = getAndShowById("mutationTester")
     const clamp = new LineClamp(element, { minFontSize: 48, maxLines: 1 })
     const clampSpy = chai.spy.on(clamp, "apply")
 
@@ -140,7 +140,7 @@ describe("LineClamp", () => {
   })
 
   it("Padding, border, min-height, and font-size are taken into account", () => {
-    const element = document.getElementById("dimensionsTester")
+    const element = getAndShowById("dimensionsTester")
     const clamp = new LineClamp(element, { maxLines: 1 })
 
     clamp.apply()
@@ -159,7 +159,7 @@ describe("LineClamp", () => {
     // We have to just take this for granted. There's no other way to get the
     // number of lines to test against.
     const expectedLineCount = 3
-    const element = document.getElementById("displayInlineTester")
+    const element = getAndShowById("displayInlineTester")
     const clamp = new LineClamp(element, { maxLines: expectedLineCount })
     const { lineCount } = clamp.calculateTextMetrics()
 
@@ -169,8 +169,8 @@ describe("LineClamp", () => {
 
   // TODO Clean this mess up
   it("Events trigger only when clamping occurs", () => {
-    const scEl = document.getElementById("softClampOnlyFiresIfTriggeredTester")
-    const hcEl = document.getElementById("hardClampOnlyFiresIfTriggeredTester")
+    const scEl = getAndShowById("softClampOnlyFiresIfTriggeredTester")
+    const hcEl = getAndShowById("hardClampOnlyFiresIfTriggeredTester")
 
     const softClamp = new LineClamp(scEl, { maxLines: 1, useSoftClamp: true })
     const hardClamp = new LineClamp(hcEl, { maxLines: 1, useSoftClamp: false })
@@ -202,3 +202,12 @@ describe("LineClamp", () => {
     expect(hardClampGenericListenerSpy).not.to.have.been.called()
   })
 })
+
+function getAndShowById(id) {
+  const el = document.getElementById(id)
+  const tester = el.closest(".tester")
+
+  tester.classList.add("active")
+
+  return el
+}
