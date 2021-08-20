@@ -7,8 +7,11 @@ describe("LineClamp", () => {
     const element = getAndShowById("strictTester")
     const clamp = new LineClamp(element, {
       maxLines: 1,
-      strict: true,
+      useSoftClamp: true,
     })
+
+    const softClampSpy = chai.spy.on(clamp, "softClamp")
+    const hardClampSpy = chai.spy.on(clamp, "hardClamp")
 
     clamp.apply()
 
@@ -17,6 +20,11 @@ describe("LineClamp", () => {
       element.clientHeight,
       "Element reduced to one strict line."
     )
+
+    clamp.apply()
+
+    expect(softClampSpy).to.have.been.called()
+    expect(hardClampSpy).not.to.have.been.called()
   })
 
   it("Limits to height of one line in original font size", () => {
