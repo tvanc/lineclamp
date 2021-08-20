@@ -358,8 +358,8 @@ export default class LineClamp {
 }
 
 /**
- * Performs a binary search for the point in a contigous range where a given
- * test callback will go from returning true to returning false.
+ * Performs a binary search for the maximum whole number in a contigous range
+ * where a given test callback will go from returning true to returning false.
  *
  * Since this uses a binary-search algorithm this is an O(log n) function,
  * where n = max - min.
@@ -381,9 +381,8 @@ export default class LineClamp {
  */
 function findBoundary(min, max, test, done) {
   // start halfway through the range
-  let cursor = Math.floor((min + max) / 2)
-
-  while (max > min) {
+  do {
+    let cursor = Math.round((min + max) / 2)
     if (test(cursor)) {
       max = cursor
     } else {
@@ -394,9 +393,7 @@ function findBoundary(min, max, test, done) {
       done(cursor, min, max)
       break
     }
-
-    cursor = Math.floor((min + max) / 2)
-  }
+  } while (max > min)
 }
 
 function emit(instance, type) {
