@@ -11,6 +11,11 @@
     white-space: pre-wrap;
 }
 
+.test:hover,
+.test:focus-within {
+    background-color: ghostwhite;
+}
+
 .tester {
     display: none;
     width: 300px;
