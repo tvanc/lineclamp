@@ -100,7 +100,7 @@ describe("LineClamp", () => {
     })
 
     // Guarantee softClamp() will escalate to hardClamp()
-    clamp.minFontSize = clamp.maxFontSize
+    clamp.minFontSize = clamp.maxFontSize - 1
 
     let softClampTriggeredFirst = false
     let hardClampTriggeredNext = false
