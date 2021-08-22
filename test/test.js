@@ -92,7 +92,7 @@ describe("LineClamp", () => {
     expect(hardClampSpy).to.have.been.called()
   })
 
-  it("Events trigger properly", () => {
+  it("Event order: softclamp, hardclamp, clamp", () => {
     const element = getAndShowById("eventsTester")
     const clamp = new LineClamp(element, {
       useSoftClamp: true,
