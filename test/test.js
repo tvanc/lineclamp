@@ -175,40 +175,23 @@ describe("LineClamp", () => {
     assert.equal(lineCount, expectedLineCount, "Inline text is correct height.")
   })
 
-  // TODO Clean this mess up
-  it("Events trigger only when clamping occurs", () => {
-    const scEl = getAndShowById("softClampOnlyFiresIfTriggeredTester")
-    const hcEl = getAndShowById("hardClampOnlyFiresIfTriggeredTester")
+  it(
+    "No softclamp event triggered if no change in font size",
+    getNoOpTest(
+      "softClampOnlyFiresIfTriggeredTester",
+      "lineclamp.softclamp",
+      true
+    )
+  )
 
-    const softClamp = new LineClamp(scEl, { maxLines: 1, useSoftClamp: true })
-    const hardClamp = new LineClamp(hcEl, { maxLines: 1, useSoftClamp: false })
-
-    const softClampListener = () => console.log("softclamp: Soft clamped!")
-    const hardClampListener = () => console.log("hardclamp: Hard clamped!")
-
-    const scElGenericListener = () => console.log("softclamp: clamped!")
-    const hcElGenericListener = () => console.log("hardclamp: clamped!")
-
-    const softClampListenerSpy = chai.spy(softClampListener)
-    const hardClampListenerSpy = chai.spy(hardClampListener)
-    const softClampGenericListenerSpy = chai.spy(scElGenericListener)
-    const hardClampGenericListenerSpy = chai.spy(hcElGenericListener)
-
-    scEl.addEventListener("lineclamp.softclamp", softClampListenerSpy)
-    scEl.addEventListener("lineclamp.clamp", softClampGenericListenerSpy)
-
-    hcEl.addEventListener("lineclamp.hardclamp", hardClampListenerSpy)
-    hcEl.addEventListener("lineclamp.clamp", hardClampGenericListenerSpy)
-
-    softClamp.apply()
-    hardClamp.apply()
-
-    expect(softClampListenerSpy).not.to.have.been.called()
-    expect(softClampGenericListenerSpy).not.to.have.been.called()
-
-    expect(hardClampListenerSpy).not.to.have.been.called()
-    expect(hardClampGenericListenerSpy).not.to.have.been.called()
-  })
+  it(
+    "No hardclamp event if no lines removed",
+    getNoOpTest(
+      "hardClampOnlyFiresIfTriggeredTester",
+      "lineclamp.hardclamp",
+      false
+    )
+  )
 })
 
 function getAndShowById(id) {
@@ -218,4 +201,24 @@ function getAndShowById(id) {
   tester.classList.add("active")
 
   return el
+}
+
+function getNoOpTest(elId, event, useSoftClamp) {
+  return () => {
+    const el = getAndShowById(elId)
+    const clamp = new LineClamp(el, { maxLines: 1, useSoftClamp })
+    const handler = (e) => console.log(`[${event} test]: ${e.type} fired`)
+
+    // Listener for event type, `event`
+    const givenEventSpy = chai.spy(handler)
+    const genericEventSpy = chai.spy(handler)
+
+    el.addEventListener(event, givenEventSpy)
+    el.addEventListener("lineclamp.clamp", genericEventSpy)
+
+    clamp.apply()
+
+    expect(givenEventSpy).not.to.have.been.called()
+    expect(genericEventSpy).not.to.have.been.called()
+  }
 }
