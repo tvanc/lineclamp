@@ -380,9 +380,9 @@ export default class LineClamp {
  * - minFailingValue
  */
 function findBoundary(min, max, test, done) {
+  let cursor = max
   // start halfway through the range
-  do {
-    let cursor = Math.round((min + max) / 2)
+  while (max > min) {
     if (test(cursor)) {
       max = cursor
     } else {
@@ -393,7 +393,9 @@ function findBoundary(min, max, test, done) {
       done(cursor, min, max)
       break
     }
-  } while (max > min)
+
+    cursor = Math.round((min + max) / 2)
+  }
 }
 
 function emit(instance, type) {
