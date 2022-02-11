@@ -40,7 +40,7 @@
     "chai-spies": "^1.0.0",
     "mocha": "^9.2.0",
     "prettier": "^2.5.1",
-    "rollup": "^2.66.1",
+    "rollup": "^2.67.2",
     "rollup-plugin-terser": "^7.0.2"
   }
 }
