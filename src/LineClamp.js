@@ -358,7 +358,7 @@ export default class LineClamp {
 }
 
 /**
- * Performs a binary search for the maximum whole number in a contigous range
+ * Performs a binary search for the maximum whole number in a contiguous range
  * where a given test callback will go from returning true to returning false.
  *
  * Since this uses a binary-search algorithm this is an O(log n) function,
