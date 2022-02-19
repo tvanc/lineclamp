@@ -1,10 +1,10 @@
 # LineClamp
 
+![Animation showing text resizing to stay one line long regardless of container width](./doc/lineclamp.webp)
+
 Limit text to a given height or number of lines by reducing font
 size or trimming text. Works on inline and block elements with any combination
 of border, padding, line-height, min-height, and max-height.
-
-![Animation showing LineClamp in action](./doc/lineclamp.webp)
 
 ## Installation
 
