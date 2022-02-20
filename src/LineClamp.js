@@ -190,6 +190,17 @@ export default class LineClamp {
         attributes: true,
       })
 
+      /**
+       * TODO: Further research using `ResizeObserver`
+       *
+       * Current drawbacks:
+       * - Clamping occurs less frequently making changes look stilted when resizing window.
+       * - Changes behavior: Elements which previously changed size because they were reclamped no longer will.
+       * - Fires immediately upon calling `.observe()`. Not a huge deal. Observer just needs to change not to
+       *   fire if `false === this._watching`
+       */
+      // this.resizeObserver.observe(this.element)
+
       this._watching = true
     }
 
@@ -204,6 +215,8 @@ export default class LineClamp {
   unwatch() {
     this.observer.disconnect()
     window.removeEventListener("resize", this.updateHandler)
+
+    // this.resizeObserver.disconnect()
 
     this._watching = false
 
