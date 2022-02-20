@@ -381,7 +381,7 @@ export default class LineClamp {
  */
 function findBoundary(min, max, test, done) {
   let cursor = max
-  // start halfway through the range
+
   while (max > min) {
     if (test(cursor)) {
       max = cursor
