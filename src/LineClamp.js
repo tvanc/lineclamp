@@ -357,6 +357,9 @@ export default class LineClamp {
   }
 }
 
+const fractionalDigits = 2
+const minStep = round(1 - `0.${new Array(fractionalDigits).fill(9).join("")}`)
+
 /**
  * Performs a binary search for the maximum whole number in a contiguous range
  * where a given test callback will go from returning true to returning false.
@@ -389,15 +392,19 @@ function findBoundary(min, max, test, done) {
       min = cursor
     }
 
-    if (max - min === 1) {
+    if (round(max - min) === minStep) {
       done(cursor, min, max)
       break
     }
 
-    cursor = Math.round((min + max) / 2)
+    cursor = round((min + max) / 2)
   }
 }
 
 function emit(instance, type) {
   instance.element.dispatchEvent(new CustomEvent(type))
+}
+
+function round(num) {
+  return num.toFixed(fractionalDigits) * 1
 }
