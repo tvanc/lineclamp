@@ -83,7 +83,7 @@ import LineClamp from "@tvanc/lineclamp"
 const element = document.getElementById("#clampedElement")
 
 const clamp = new LineClamp(element)
-const listener = event => console.log(event.type)
+const listener = (event) => console.log(event.type)
 
 element.addEventListener("lineclamp.softclamp", listener)
 element.addEventListener("lineclamp.hardclamp", listener)
@@ -105,15 +105,15 @@ clamp.apply()
 ### Getting Text Metrics
 
 Unfortunately, there is no native API for counting the number of lines or
-determining line height. The computed CSS line-height can return "`normal`",
+determining line height. The computed CSS line-height can return `normal`,
 which isn't useful for calculations. The only (mostly) sure-fire solution is to
 compare the height of the element with no text to the height of the element
-with one line with one line of text. That gets you the height of the first line.
+with one line of text. That gets you the height of the first line.
 
 Subsequent lines can have different heights than the first - though
 all subsequent lines will be the same height as each other
 (barring things that can distort line heights, like certain characters). So you
-have to add an additional line to know the height of the next lines.
+have to add another line to know the height of the next lines.
 
 This module does all that. The information it gleans is made available via the
 `calculateTextMetrics()` method:
